@@ -3,7 +3,7 @@
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
-            "jugger\\db": "src/"
+            "jugger\\db\\": "src/"
         }
     },
     "require": {
