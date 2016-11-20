@@ -2,9 +2,6 @@
 
 namespace jugger\db;
 
-use Bitrix\Main\DB\SqlHelper;
-use jugger\di\Container;
-
 class QueryBuilder
 {
 	public $query;
