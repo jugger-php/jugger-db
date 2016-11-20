@@ -1,6 +1,11 @@
 {
     "name": "jugger-php/jugger-db",
     "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "jugger\\db": "src/"
+        }
+    },
     "require": {
         "php": "^7.0.9"
     }
