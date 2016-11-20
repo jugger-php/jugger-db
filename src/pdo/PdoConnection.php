@@ -1,26 +1,19 @@
 <?php
 namespace jugger\db\pdo;
 
+use PDO;
 use jugger\db\QueryResult;
 use jugger\db\ConnectionInterface;
 
 class PdoConnection implements ConnectionInterface
 {
-    public $host;
-    public $username;
-    public $password;
-    public $database;
+    public $dsn;
 
     protected function getDriver()
     {
         static $driver = null;
         if (!$driver) {
-            $driver = new mysqli(
-                $this->host,
-                $this->username,
-                $this->password,
-                $this->database
-            );
+            $driver = new PDO($this->dsn);
         }
         return $driver;
     }
