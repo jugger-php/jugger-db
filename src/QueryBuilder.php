@@ -128,8 +128,11 @@ class QueryBuilder
 				if (is_integer($alias)) {
 					$sql .= $this->connection->quote($column);
 				}
+				elseif ($column instanceof Query) {
+					$sql .= "({$column->build()}) AS ".$this->connection->quote($alias);
+				}
 				else {
-					$sql .= $column ." AS ".$this->connection->quote($alias);
+					$sql .= $this->connection->quote($column) ." AS ".$this->connection->quote($alias);
 				}
 				$sql .= ", ";
 			}
@@ -152,7 +155,7 @@ class QueryBuilder
 					$sql .= "({$table->build()}) AS ".$this->connection->quote($alias);
 				}
 				else {
-					$sql .= $table ." AS ".$this->connection->quote($alias);
+					$sql .= $this->connection->quote($table) ." AS ".$this->connection->quote($alias);
 				}
 				$sql .= ", ";
 			}
