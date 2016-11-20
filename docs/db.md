@@ -5,7 +5,7 @@
 Для работы с базой данных используется пул соединений, который обеспечивает возможность создания нескольких соединений, для конкретных задач.
 
 Создания пула необходимо выполнить следующий код:
-```
+```php
 use jugger\db\ConnectionPool;
 
 ConnectionPool::getInstance()->init([
@@ -26,7 +26,7 @@ ConnectionPool::getInstance()->init([
 ## Connection
 
 Каждый класс соединения, должен реализовывать интерфейс `ConnectionInterface`, содержащий методы:
-```
+```php
 // получить объект Connection
 $conn = ConnectionPool::get('default');
 
@@ -37,14 +37,13 @@ $conn->execute('SQL'); // выполнить запрос INSERT, UPDATE, DELETE
 // подготовка запроса
 $conn->quote('table or column name');       // добавляет кавычки (в зависимости от СУБД это могут быть разные символы. Например, в MySQL это " ` ", в SQLite это " ' ")
 $conn->escape('string with SQL injection'); // обрабатывает строку для защиты от SQL инъекий
-
 ```
 
 ## Query Builder
 
 Для удобства и большей безопасности можно использовать построитель запросов - `Query`.
 Данный класс позволяет вам писать SQL запросы, используя сущности PHP:
-```
+```php
 // объект запроса
 $query = new Query();
 
@@ -59,42 +58,50 @@ $query->select('...')
     ->from('...')
     ->where('...');
 
-//
-// Допустимые конструкции
-//
+// SELECT
+$query->select("col1, col2");
+$query->select(["col1", "col2"]);
+$query->select(["c1" => "col1"]); // col1 AS c1
 
-// select - по умолчанию равен '*'
-$query->select('id, name');
-$query->select(['id', 'name']);
+// по-умолчанию SELECT равен '*', поэтому его можно не указывать вовсе
+$query->from('t'); // SELECT * FROM t
 
-// from
+// также можно использовать подзапросы
+$subQuery = (new Query())->from('t2');
+$query->select([
+    "c1" => $subQuery, // (SELECT * FROM t2) AS 'c1'
+]);
+
+// FROM
 $query->from('table');
 $query->from([
     'table1',
-    'table2' => 't2', // эквивалент: `table2` AS `t2`
+    'table2' => 't2', // `table2` AS `t2`
 ]);
 
-// также можно обращаться к псевдонимам таблиц в блоке 'select'
-$query->select(['t2.id', 't1.name'])
-    ->from([
-        'table1' => 't1',
-        'table2' => 't2',
-    ]);
+// также можно использовать подзапросы
+$subQuery = (new Query())->from('t2');
+$query->from([
+    "c1" => $subQuery, // (SELECT * FROM t2) AS 'c1'
+]);
 
-// join
-$query->join('LEFT', 'table3', 'table1.id = table3.id_t1');
+// JOIN
+$query->join('LEFT', 't2', 't.id = t2.id_t1');
+$query->join('RIGHT', 't2', 't.id = t2.id_t1');
+$query->join('INNER', 't2', 't.id = t2.id_t1');
 
-// также для удобства, можно вызывать метод с нужным типов связки
-$query->leftJoin('table3', 'table1.id = table3.id_t1');
-$query->rightJoin('table4', 'table1.id = table4.id_t1');
+// для удобства, можно вызывать метод с нужным типов связки
+$query->leftJoin('t2', 't.id = t2.id_t1');
+$query->rightJoin('t2', 't.id = t2.id_t1');
+$query->innerJoin('t2', 't.id = t2.id_t1');
 
 // также можно использовать конструкцию 'AS' для связной таблицы
 $query->innerJoin(
-    ['table3' => 't3'],
-    'table1.id = t3.id_t1'
+    ['table2' => 't2'], // INNER JOIN 'table2' AS 't2' ON t.id = t2.id_t1
+    't.id = t2.id_t1'
 );
 
-// where
+// WHERE
 $query->where('t1.id = t2.id_t2');
 
 // при указании условий в виде массива,
@@ -256,7 +263,7 @@ Query::delete('tableName', [
 ```
 
 После того как запрос сформирован, его необходимо выполнить:
-```
+```php
 // получаем объект QueryResult
 $query->query();
 
@@ -274,7 +281,7 @@ $query->build();
 
 Для обработки результатов запроса, используется класс `QueryResult`.
 Реализует данный класс всего 2 метода:
-```
+```php
 // получаем объект результата запроса
 $result = $query->query();
 
