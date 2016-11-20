@@ -3,8 +3,6 @@
 use PHPUnit\Framework\TestCase;
 use jugger\db\Query;
 
-include_once __DIR__ .'/bootstrap.php';
-
 class QueryTest extends TestCase
 {
     public function testFirst()
