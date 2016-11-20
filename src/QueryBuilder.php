@@ -18,7 +18,7 @@ class QueryBuilder
 		foreach ($values as $column => $value) {
 			$tmp[] = $value instanceof SqlExpression
 				? $value
-				: $this->connection->prepare($value);
+				: $this->connection->escape($value);
 			$columns[] = $this->connection->quote($column);
 		}
 		$table = $this->connection->quote($table);
@@ -34,7 +34,7 @@ class QueryBuilder
 			$column = $this->connection->quote($column);
 			$value = $value instanceof SqlExpression
 				? $value
-				: $this->connection->prepare($value);
+				: $this->connection->escape($value);
 			$sets[] = "{$column} = {$value}";
 		}
 		$sets = join(", ", $sets);
@@ -175,7 +175,25 @@ class QueryBuilder
 		elseif (is_array($join)) {
 			foreach ($join as $data) {
 				list($type, $table, $on) = $data;
-				$table = $this->connection->quote($table);
+				if (is_array($table)) {
+					if (is_integer(key($table))) {
+						$table = $this->connection->quote(current($table));
+					}
+					else {
+						$alias = key($table);
+						$table = current($table);
+
+						if ($table instanceof Query) {
+							$table = "({$table->build()})";
+						}
+						else {
+							$table = $this->connection->quote($table);
+						}
+
+						$table .= ' AS '. $this->connection->quote($alias);
+					}
+				}
+
 				$sql .= " {$type} JOIN {$table} ON {$on} ";
 			}
 		}
@@ -200,8 +218,14 @@ class QueryBuilder
 	public function buildWhereComplex(array $columns) {
 		$logic = "AND";
 		if (isset($columns[0]) && is_scalar($columns[0])) {
-			$logic = strtoupper($columns[0]) == "AND" ? "AND" : "OR";
-			unset($columns[0]);
+			if (strtoupper(trim($columns[0])) == "AND") {
+				$logic = "AND";
+				unset($columns[0]);
+			}
+			elseif (strtoupper(trim($columns[0])) == "OR") {
+				$logic = "OR";
+				unset($columns[0]);
+			}
 		}
 
 		$parts = [];
@@ -209,12 +233,16 @@ class QueryBuilder
 			if (is_integer($key) && is_array($value)) {
 				$parts[] = "({$this->buildWhereComplex($value)})";
 			}
+			elseif (is_integer($key)) {
+				$parts[] = $value;
+			}
 			elseif (is_string($key)) {
 				$operator = $this->parseOperator($key);
 				$parts[] = $this->buildWhereSimple($key, $operator, $value);
 			}
 			else {
-				throw new \Exception("Invalide param");
+				$params = var_export(compact('key', 'value'), true);
+				throw new \Exception("Invalide params: ". $params);
 			}
 		}
 
@@ -230,10 +258,6 @@ class QueryBuilder
 	}
 
 	public function buildWhereSimple($column, $operator, $value) {
-		if ($value instanceof Query) {
-			$value = "({$value->build()})";
-		}
-
 		switch ($operator) {
 			// EQUAL
 			case '=':
@@ -255,11 +279,21 @@ class QueryBuilder
 			// LIKE
 			case '%':
 				$column = $this->connection->quote($column);
-                $value = "'". $this->connection->prepare($value) ."'";
+				if ($value instanceof Query) {
+					$value = "({$value->build()})";
+				}
+				else {
+					$value = "'". $this->connection->escape($value) ."'";
+				}
 				return $column ." LIKE {$value}";
 			case '!%':
 				$column = $this->connection->quote($column);
-                $value = "'". $this->connection->prepare($value) ."'";
+				if ($value instanceof Query) {
+					$value = "({$value->build()})";
+				}
+				else {
+					$value = "'". $this->connection->escape($value) ."'";
+				}
 				return $column ." NOT LIKE {$value}";
 			// other
 			case '>':
@@ -267,7 +301,7 @@ class QueryBuilder
 			case '<':
 			case '<=':
 				$column = $this->connection->quote($column);
-                $value = "'". $this->connection->prepare($value) ."'";
+                $value = "'". $this->connection->escape($value) ."'";
 				return $column . $operator . $value;
 			default:
 				 throw new \Excpection("Not found operator '{$operator}'");
@@ -276,6 +310,7 @@ class QueryBuilder
 
 	public function equalOperator($column, $value, $isNot = false) {
 		$not = $isNot ? "NOT" : "";
+
 		if (is_null($value)) {
 			$sql = " IS {$not} NULL";
 		}
@@ -284,7 +319,7 @@ class QueryBuilder
 		}
 		elseif (is_scalar($value)) {
 			$op = $isNot ? "<>" : "=";
-            $value = "'". $this->connection->prepare($value) ."'";
+            $value = "'". $this->connection->escape($value) ."'";
 			$sql = " {$op} ".$value;
 		}
 		elseif (is_array($value) || $value instanceof Query) {
@@ -305,7 +340,7 @@ class QueryBuilder
 		}
 		elseif (is_array($value)) {
 			$value = array_map(function($item) {
-				return $this->connection->prepare($item);
+				return $this->connection->escape($item);
 			}, $value);
 			$sql .= "(". join(",", $value). ")";
 		}
