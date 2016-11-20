@@ -1,7 +1,9 @@
-<phpunit bootstrap="../../autoload.php">
+<phpunit bootstrap="tests/bootstrap.php">
     <testsuites>
         <testsuite name="query">
-          <file>tests/QueryTest.php</file>
+            <file>tests/query/select-from.php</file>
+            <file>tests/query/join.php</file>
+            <file>tests/query/where.php</file>
         </testsuite>
     </testsuites>
 </phpunit>
