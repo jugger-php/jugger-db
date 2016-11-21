@@ -6,6 +6,7 @@ use jugger\db\Query;
 class WhereTest extends TestCase
 {
     /**
+     * Проверяет равнозначность различных вариантов записи
      * @dataProvider equivalentProvider
      */
     public function testEquivalent(... $values)
@@ -61,6 +62,7 @@ class WhereTest extends TestCase
     }
 
     /**
+     * Проверяет все доспустимые операторы
      * @dataProvider dataProvider
      */
     public function testOperators($value, $sql)
@@ -152,6 +154,9 @@ class WhereTest extends TestCase
         ];
     }
 
+    /**
+     * Проверяет логические конструкции и их вложенность
+     */
     public function testLogic()
     {
         $q1 = (new Query())->from('t');
