@@ -53,6 +53,11 @@ class WhereTest extends TestCase
                 ['@id' => $query],
             ],
             [
+                ['!id' => $number],
+                ['!=id' => $number],
+                ['<>id' => $number],
+            ],
+            [
                 ['!id' => $query],
                 ['!=id' => $query],
                 ['<>id' => $query],
