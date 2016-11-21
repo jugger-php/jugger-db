@@ -6,6 +6,7 @@ use jugger\db\Query;
 class SelectFromTest extends TestCase
 {
     /**
+     * Проверка генерации блока SELECT
      * @dataProvider selectProvider
      */
     public function testSelect($select, $sql)
@@ -44,6 +45,7 @@ class SelectFromTest extends TestCase
     }
 
     /**
+     * Проверка генерации блока FROM
      * @dataProvider fromProvider
      */
     public function testFrom($from, $sql)
