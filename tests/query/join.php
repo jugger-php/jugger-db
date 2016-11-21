@@ -5,6 +5,9 @@ use jugger\db\Query;
 
 class JoinTest extends TestCase
 {
+    /**
+     * Тест эквивалентности различных типов связи
+     */
     public function testTypes()
     {
         $t2 = 't2';
@@ -37,6 +40,9 @@ class JoinTest extends TestCase
         return true;
     }
 
+    /**
+     * Тест множественного использования
+     */
     public function testMany()
     {
         $query = (new Query())->from('t');
@@ -57,6 +63,7 @@ class JoinTest extends TestCase
     }
 
     /**
+     * Тест различных вариантов формирования аргумента 'table' (аналог FROM)
      * @depends testTypes
      * @dataProvider dataProvider
      */
