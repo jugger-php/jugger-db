@@ -1,9 +1,10 @@
 <phpunit bootstrap="tests/bootstrap.php">
     <testsuites>
         <testsuite name="query">
-            <file>tests/query/select-from.php</file>
-            <file>tests/query/join.php</file>
-            <file>tests/query/where.php</file>
+            <directory suffix='.php'>tests/query</directory>
+        </testsuite>
+        <testsuite name="connection">
+            <directory suffix='.php'>tests/connection</directory>
         </testsuite>
     </testsuites>
 </phpunit>
