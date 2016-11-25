@@ -2,18 +2,10 @@
 
 namespace jugger\db;
 
+use Exception;
+
 class QueryBuilder
 {
-	public $query;
-	public $connection;
-
-
-
-	public static function query(Query $query)
-	{
-
-	}
-
 	public static function insert(string $tableName, array $values)
 	{
 		$db = ConnectionPool::get('default');
@@ -30,7 +22,7 @@ class QueryBuilder
 		$valuesStr = implode(",", $valuesStr);
 
 		$sql = "INSERT INTO {$tableName}({$columnsStr}) VALUES({$valuesStr})";
-		return $db->execute($sql);
+		return new Command($sql, $db);
 	}
 
 	public static function update(string $tableName, array $columns, $where)
@@ -38,86 +30,57 @@ class QueryBuilder
 		$db = ConnectionPool::get('default');
 		$tableName = $db->quote($tableName);
 
+		$valuesStr = [];
+		foreach ($columns as $name => $value) {
+			$name = $db->quote($name);
+			$value = $db->escape($value);
+			$valuesStr[] = "{$name} = '{$value}'";
+		}
+		$valuesStr = implode(', ', $valuesStr);
+		$whereStr = self::buildWhere($where);
 
-		$sql = "UPDATE {$tableName} SET {$valuesStr} WHERE {$whereStr}";
-		return $db->execute($sql);
+		$sql = "UPDATE {$tableName} SET {$valuesStr} {$whereStr}";
+		return new Command($sql, $db);
 	}
 
 	public static function delete(string $tableName, $where)
 	{
+		$db = ConnectionPool::get('default');
+		$tableName = $db->quote($tableName);
+		$whereStr = self::buildWhere($where);
 
+		$sql = "DELETE FROM {$tableName} {$whereStr}";
+		return new Command($sql, $db);
 	}
 
-
-
-	public function __construct(Query $query) {
-		$this->query = $query;
-		$this->connection = ConnectionPool::get('default');
+	public static function build(Query $query)
+	{
+		return self::buildSelect($query->select) .
+			self::buildFrom($query->from) .
+			self::buildJoin($query->join) .
+			self::buildWhere($query->where) .
+			self::buildGroupBy($query->groupBy) .
+			self::buildHaving($query->having) .
+			self::buildOrderBy($query->orderBy) .
+			self::buildLimitOffset($query->limit, $query->offset);
 	}
 
-	public function insert($table, $values) {
-		$tmp = [];
-		$columns = [];
-		foreach ($values as $column => $value) {
-			$tmp[] = $value instanceof SqlExpression
-				? $value
-				: $this->connection->escape($value);
-			$columns[] = $this->connection->quote($column);
-		}
-		$table = $this->connection->quote($table);
-		$columns = join(", ", $columns);
-		$values = join(", ", $tmp);
-		$sql = "INSERT INTO {$table}({$columns}) VALUES({$values})";
-		return $sql;
-	}
-
-	public function update($table, $values, $where = null) {
-		$sets = [];
-		foreach ($values as $column => $value) {
-			$column = $this->connection->quote($column);
-			$value = $value instanceof SqlExpression
-				? $value
-				: $this->connection->escape($value);
-			$sets[] = "{$column} = {$value}";
-		}
-		$sets = join(", ", $sets);
-		$table = $this->connection->quote($table);
-		$sql = "UPDATE {$table} SET {$sets}";
-		if (empty($where)) {
-			// pass
-		}
-		elseif (is_string($where)) {
-			$sql .= " WHERE ". $where;
-		}
-		elseif (is_array($where)) {
-			$sql .= " WHERE ". $this->buildWhereComplex($where);
-		}
-		return $sql;
-	}
-
-	public function build() {
-		return $this->buildSelect($this->query->select) .
-			$this->buildFrom($this->query->from) .
-			$this->buildJoin($this->query->join) .
-			$this->buildWhere($this->query->where) .
-			$this->buildGroupBy($this->query->groupBy) .
-			$this->buildHaving($this->query->having) .
-			$this->buildOrderBy($this->query->orderBy) .
-			$this->buildLimitOffset($this->query->limit, $this->query->offset);
-	}
-
-	public function buildLimitOffset($limit, $offset = 0) {
+	public static function buildLimitOffset($limit, $offset = 0) {
 		$limit = (int) $limit;
 		$offset = (int) $offset;
-		if ($offset) {
+
+		if ($limit < 1) {
+			return "";
+		}
+		elseif ($offset) {
 			return " LIMIT {$offset}, {$limit}";
 		}
-		elseif ($limit > 0) {
+		else {
 			return " LIMIT {$limit}";
 		}
 	}
 
-	public function buildOrderBy($orderBy) {
+	public static function buildOrderBy($orderBy) {
 		$sql = " ORDER BY ";
 		if (empty($orderBy)) {
 			return "";
@@ -134,7 +97,7 @@ class QueryBuilder
 		return $sql;
 	}
 
-	public function buildGroupBy($groupBy) {
+	public static function buildGroupBy($groupBy) {
 		$sql = " GROUP BY ";
 		if (empty($groupBy)) {
 			return "";
@@ -151,14 +114,14 @@ class QueryBuilder
 		return $sql;
 	}
 
-	public function buildHaving($having) {
+	public static function buildHaving($having) {
 		if (empty($having)) {
 			return "";
 		}
 		return " HAVING ".$having;
 	}
 
-	public function buildSelect($select) {
+	public static function buildSelect($select) {
 		$sql = "SELECT ";
 		if (empty($select)) {
 			$sql .= "*";
@@ -184,7 +147,7 @@ class QueryBuilder
 		return $sql;
 	}
 
-	public function buildFrom($from) {
+	public static function buildFrom($from) {
 		$sql = " FROM ";
 		if (is_string($from)) {
 			$sql .= $from;
@@ -207,7 +170,7 @@ class QueryBuilder
 		return $sql;
 	}
 
-	public function buildJoin($join) {
+	public static function buildJoin($join) {
 		$sql = "";
 		if (empty($join)) {
 			// pass
@@ -243,7 +206,7 @@ class QueryBuilder
 		return $sql;
 	}
 
-	public function buildWhere($where) {
+	public static function buildWhere($where) {
 		if (empty($where)) {
 			return "";
 		}
@@ -255,10 +218,14 @@ class QueryBuilder
 		elseif (is_array($where)) {
 			$sql .= $this->buildWhereComplex($where);
 		}
+		else {
+			return "";
+		}
+
 		return $sql;
 	}
 
-	public function buildWhereComplex(array $columns) {
+	public static function buildWhereComplex(array $columns) {
 		$logic = "AND";
 		if (isset($columns[0]) && is_scalar($columns[0])) {
 			if (strtoupper(trim($columns[0])) == "AND") {
@@ -292,7 +259,7 @@ class QueryBuilder
 		return join(" {$logic} ", $parts);
 	}
 
-	public function parseOperator(& $key) {
+	public static function parseOperator(& $key) {
 		$re = '/^([!@%><=]*)(.*)$/';
 		preg_match($re, $key, $m);
 		$op = empty($m[1]) ? '=' : $m[1];
@@ -300,7 +267,7 @@ class QueryBuilder
 		return $op;
 	}
 
-	public function buildWhereSimple($column, $operator, $value) {
+	public static function buildWhereSimple($column, $operator, $value) {
 		switch ($operator) {
 			// EQUAL
 			case '=':
@@ -351,7 +318,7 @@ class QueryBuilder
 		}
 	}
 
-	public function equalOperator($column, $value, $isNot = false) {
+	public static function equalOperator($column, $value, $isNot = false) {
 		$not = $isNot ? "NOT" : "";
 
 		if (is_null($value)) {
@@ -373,7 +340,7 @@ class QueryBuilder
 		return $column . $sql;
 	}
 
-	public function inOperator($column, $value, $isNot = false) {
+	public static function inOperator($column, $value, $isNot = false) {
 		$sql = $this->connection->quote($column) . ($isNot ? " NOT IN ": " IN ");
 		if (is_string($value)) {
 			$sql .= "($value)";
@@ -390,7 +357,7 @@ class QueryBuilder
 		return $sql;
 	}
 
-	public function betweenOperator($column, $value, $isNot = false) {
+	public static function betweenOperator($column, $value, $isNot = false) {
 		$sql = $isNot ? " NOT BETWEEN " : " BETWEEN ";
 		$min = (int) $value[0];
 		$max = (int) $value[1];
