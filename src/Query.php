@@ -118,37 +118,4 @@ class Query
     {
         return $this->query()->fetchAll();
 	}
-
-	/*
-	 * C[r]UD operations
-	 */
-
-	public static function insert(string $tableName, array $values)
-	{
-		$db = ConnectionPool::get('default');
-		$tableName = $db->quote($tableName);
-
-		$columnsStr = [];
-		$valuesStr = [];
-		foreach ($values as $column => $value) {
-			$columnsStr[] = $db->quote($column);
-			$valuesStr[] = "'". $db->escape($value) ."'";
-		}
-
-		$columnsStr = implode(",", $columnsStr);
-		$valuesStr = implode(",", $valuesStr);
-
-		$sql = "INSERT INTO {$tableName}({$columnsStr}) VALUES({$valuesStr})";
-		return $db->execute($sql);
-	}
-
-	public static function update(string $tableName, array $columns, $where)
-	{
-
-	}
-
-	public static function delete(string $tableName, $where)
-	{
-
-	}
 }
