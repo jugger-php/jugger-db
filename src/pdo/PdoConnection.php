@@ -9,11 +9,12 @@ class PdoConnection implements ConnectionInterface
 {
     public $dsn;
 
-    protected function getDriver()
+    public function getDriver()
     {
         static $driver = null;
         if (!$driver) {
             $driver = new PDO($this->dsn);
+            $driver->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         }
         return $driver;
     }
@@ -21,7 +22,9 @@ class PdoConnection implements ConnectionInterface
     public function query(string $sql): QueryResult
     {
         $db = $this->getDriver();
-        return new PdoQueryResult($db->query($sql));
+        $stmt = $db->prepare($sql);
+        $stmt->execute();
+        return new PdoQueryResult($stmt);
     }
 
     public function execute(string $sql)
