@@ -38,8 +38,8 @@ class QueryBuilder
 		}
 		$valuesStr = implode(', ', $valuesStr);
 		$whereStr = self::buildWhere($where);
-
 		$sql = "UPDATE {$tableName} SET {$valuesStr} {$whereStr}";
+
 		return new Command($sql, $db);
 	}
 
@@ -48,8 +48,8 @@ class QueryBuilder
 		$db = ConnectionPool::get('default');
 		$tableName = $db->quote($tableName);
 		$whereStr = self::buildWhere($where);
-
 		$sql = "DELETE FROM {$tableName} {$whereStr}";
+
 		return new Command($sql, $db);
 	}
 
@@ -65,7 +65,8 @@ class QueryBuilder
 			self::buildLimitOffset($query->limit, $query->offset);
 	}
 
-	public static function buildLimitOffset($limit, $offset = 0) {
+	public static function buildLimitOffset($limit, $offset = 0)
+	{
 		$limit = (int) $limit;
 		$offset = (int) $offset;
 
@@ -80,8 +81,10 @@ class QueryBuilder
 		}
 	}
 
-	public static function buildOrderBy($orderBy) {
+	public static function buildOrderBy($orderBy)
+	{
 		$sql = " ORDER BY ";
+
 		if (empty($orderBy)) {
 			return "";
 		}
@@ -94,11 +97,15 @@ class QueryBuilder
 			}
 			$sql = substr($sql, 0, -2);
 		}
+
 		return $sql;
 	}
 
-	public static function buildGroupBy($groupBy) {
+	public static function buildGroupBy($groupBy)
+	{
 		$sql = " GROUP BY ";
+		$db = ConnectionPool::get('default');
+
 		if (empty($groupBy)) {
 			return "";
 		}
@@ -106,23 +113,29 @@ class QueryBuilder
 			$sql .= $groupBy;
 		}
 		elseif (is_array($groupBy)) {
-			$groupBy = array_map(function($item){
-				return $this->connection->quote($item);
-			}, $groupBy);
+			foreach ($groupBy as & $item) {
+				$item = $db->quote($item);
+			}
 			$sql .= join(", ", $groupBy);
 		}
+
 		return $sql;
 	}
 
-	public static function buildHaving($having) {
+	public static function buildHaving($having)
+	{
 		if (empty($having)) {
 			return "";
 		}
+
 		return " HAVING ".$having;
 	}
 
-	public static function buildSelect($select) {
+	public static function buildSelect($select)
+	{
 		$sql = "SELECT ";
+		$db = ConnectionPool::get('default');
+
 		if (empty($select)) {
 			$sql .= "*";
 		}
@@ -132,46 +145,54 @@ class QueryBuilder
 		elseif (is_array($select)) {
 			foreach ($select as $alias => $column) {
 				if (is_integer($alias)) {
-					$sql .= $this->connection->quote($column);
+					$sql .= $db->quote($column);
 				}
 				elseif ($column instanceof Query) {
-					$sql .= "({$column->build()}) AS ".$this->connection->quote($alias);
+					$sql .= "({$column->build()}) AS ".$db->quote($alias);
 				}
 				else {
-					$sql .= $this->connection->quote($column) ." AS ".$this->connection->quote($alias);
+					$sql .= $db->quote($column) ." AS ".$db->quote($alias);
 				}
 				$sql .= ", ";
 			}
 			$sql = substr($sql, 0, -2);
 		}
+
 		return $sql;
 	}
 
-	public static function buildFrom($from) {
+	public static function buildFrom($from)
+	{
 		$sql = " FROM ";
+		$db = ConnectionPool::get('default');
+
 		if (is_string($from)) {
 			$sql .= $from;
 		}
 		elseif (is_array($from)) {
 			foreach ($from as $alias => $table) {
 				if (is_integer($alias)) {
-					$sql .= $this->connection->quote($table);
+					$sql .= $db->quote($table);
 				}
 				elseif ($table instanceof Query) {
-					$sql .= "({$table->build()}) AS ".$this->connection->quote($alias);
+					$sql .= "({$table->build()}) AS ".$db->quote($alias);
 				}
 				else {
-					$sql .= $this->connection->quote($table) ." AS ".$this->connection->quote($alias);
+					$sql .= $db->quote($table) ." AS ".$db->quote($alias);
 				}
 				$sql .= ", ";
 			}
 			$sql = substr($sql, 0, -2);
 		}
+
 		return $sql;
 	}
 
-	public static function buildJoin($join) {
+	public static function buildJoin($join)
+	{
 		$sql = "";
+		$db = ConnectionPool::get('default');
+
 		if (empty($join)) {
 			// pass
 		}
@@ -183,7 +204,7 @@ class QueryBuilder
 				list($type, $table, $on) = $data;
 				if (is_array($table)) {
 					if (is_integer(key($table))) {
-						$table = $this->connection->quote(current($table));
+						$table = $db->quote(current($table));
 					}
 					else {
 						$alias = key($table);
@@ -193,20 +214,22 @@ class QueryBuilder
 							$table = "({$table->build()})";
 						}
 						else {
-							$table = $this->connection->quote($table);
+							$table = $db->quote($table);
 						}
 
-						$table .= ' AS '. $this->connection->quote($alias);
+						$table .= ' AS '. $db->quote($alias);
 					}
 				}
 
 				$sql .= " {$type} JOIN {$table} ON {$on} ";
 			}
 		}
+
 		return $sql;
 	}
 
-	public static function buildWhere($where) {
+	public static function buildWhere($where)
+	{
 		if (empty($where)) {
 			return "";
 		}
@@ -216,7 +239,7 @@ class QueryBuilder
 			$sql .= $where;
 		}
 		elseif (is_array($where)) {
-			$sql .= $this->buildWhereComplex($where);
+			$sql .= self::buildWhereComplex($where);
 		}
 		else {
 			return "";
@@ -225,7 +248,8 @@ class QueryBuilder
 		return $sql;
 	}
 
-	public static function buildWhereComplex(array $columns) {
+	public static function buildWhereComplex(array $columns)
+	{
 		$logic = "AND";
 		if (isset($columns[0]) && is_scalar($columns[0])) {
 			if (strtoupper(trim($columns[0])) == "AND") {
@@ -241,68 +265,71 @@ class QueryBuilder
 		$parts = [];
 		foreach ($columns as $key => $value) {
 			if (is_integer($key) && is_array($value)) {
-				$parts[] = "({$this->buildWhereComplex($value)})";
+				$parts[] = '('. self::buildWhereComplex($value) .')';
 			}
 			elseif (is_integer($key)) {
 				$parts[] = $value;
 			}
 			elseif (is_string($key)) {
-				$operator = $this->parseOperator($key);
-				$parts[] = $this->buildWhereSimple($key, $operator, $value);
+				list($operator, $column) = self::parseOperator($key);
+				$parts[] = self::buildWhereSimple($column, $operator, $value);
 			}
 			else {
 				$params = var_export(compact('key', 'value'), true);
-				throw new \Exception("Invalide params: ". $params);
+				throw new Exception("Invalide params: ". $params);
 			}
 		}
 
-		return join(" {$logic} ", $parts);
+		return implode(" {$logic} ", $parts);
 	}
 
-	public static function parseOperator(& $key) {
+	public static function parseOperator(string $key)
+	{
 		$re = '/^([!@%><=]*)(.*)$/';
 		preg_match($re, $key, $m);
 		$op = empty($m[1]) ? '=' : $m[1];
 		$key = $m[2];
-		return $op;
+		return [$op, $key];
 	}
 
-	public static function buildWhereSimple($column, $operator, $value) {
+	public static function buildWhereSimple(string $column, string $operator, $value)
+	{
+		$db = ConnectionPool::get('default');
 		switch ($operator) {
 			// EQUAL
 			case '=':
-				return $this->equalOperator($column, $value);
+				return self::equalOperator($column, $value);
 			case '!':
 			case '!=':
 			case '<>':
-				return $this->equalOperator($column, $value, true);
+				return self::equalOperator($column, $value, true);
 			// IN
 			case '@':
-				return $this->inOperator($column, $value);
+				return self::inOperator($column, $value);
 			case '!@':
-				return $this->inOperator($column, $value, true);
+				return self::inOperator($column, $value, true);
 			// BETWEEN
 			case '><':
-				return $this->betweenOperator($column, $value);
+				return self::betweenOperator($column, $value);
 			case '>!<':
-				return $this->betweenOperator($column, $value, true);
+				return self::betweenOperator($column, $value, true);
 			// LIKE
 			case '%':
-				$column = $this->connection->quote($column);
+				$column = $db->quote($column);
 				if ($value instanceof Query) {
 					$value = "({$value->build()})";
 				}
 				else {
-					$value = "'". $this->connection->escape($value) ."'";
+					$value = "'". $db->escape($value) ."'";
 				}
 				return $column ." LIKE {$value}";
 			case '!%':
-				$column = $this->connection->quote($column);
+				$column = $db->quote($column);
 				if ($value instanceof Query) {
 					$value = "({$value->build()})";
 				}
 				else {
-					$value = "'". $this->connection->escape($value) ."'";
+					$value = "'". $db->escape($value) ."'";
 				}
 				return $column ." NOT LIKE {$value}";
 			// other
@@ -310,16 +337,18 @@ class QueryBuilder
 			case '>=':
 			case '<':
 			case '<=':
-				$column = $this->connection->quote($column);
-                $value = "'". $this->connection->escape($value) ."'";
+				$column = $db->quote($column);
+                $value = "'". $db->escape($value) ."'";
 				return $column . $operator . $value;
 			default:
 				 throw new \Excpection("Not found operator '{$operator}'");
 		}
 	}
 
-	public static function equalOperator($column, $value, $isNot = false) {
+	public static function equalOperator(string $column, $value, bool $isNot = false)
+	{
 		$not = $isNot ? "NOT" : "";
+		$db = ConnectionPool::get('default');
 
 		if (is_null($value)) {
 			$sql = " IS {$not} NULL";
@@ -329,19 +358,22 @@ class QueryBuilder
 		}
 		elseif (is_scalar($value)) {
 			$op = $isNot ? "<>" : "=";
-            $value = "'". $this->connection->escape($value) ."'";
+            $value = "'". $db->escape($value) ."'";
 			$sql = " {$op} ".$value;
 		}
 		elseif (is_array($value) || $value instanceof Query) {
-			return $this->inOperator($column, $value, $isNot);
+			return self::inOperator($column, $value, $isNot);
 		}
+		$column = $db->quote($column);
 
-		$column = $this->connection->quote($column);
 		return $column . $sql;
 	}
 
-	public static function inOperator($column, $value, $isNot = false) {
-		$sql = $this->connection->quote($column) . ($isNot ? " NOT IN ": " IN ");
+	public static function inOperator(string $column, $value, bool $isNot = false)
+	{
+		$db = ConnectionPool::get('default');
+		$sql = $db->quote($column) . ($isNot ? " NOT IN ": " IN ");
+
 		if (is_string($value)) {
 			$sql .= "($value)";
 		}
@@ -349,18 +381,23 @@ class QueryBuilder
 			$sql .= "({$value->build()})";
 		}
 		elseif (is_array($value)) {
-			$value = array_map(function($item) {
-				return $this->connection->escape($item);
-			}, $value);
+			foreach ($value as $item) {
+				$item = $db->escape($item);
+			}
 			$sql .= "(". join(",", $value). ")";
 		}
+
 		return $sql;
 	}
 
-	public static function betweenOperator($column, $value, $isNot = false) {
-		$sql = $isNot ? " NOT BETWEEN " : " BETWEEN ";
+	public static function betweenOperator(string $column, array $value, bool $isNot = false)
+	{
+		$operator = $isNot ? "NOT BETWEEN" : "BETWEEN";
+		$db = ConnectionPool::get('default');
+		$column = $db->quote($column);
 		$min = (int) $value[0];
 		$max = (int) $value[1];
-		return $sql ." {$min} AND {$max} ";
+
+		return " {$column} {$operator} {$min} AND {$max} ";
 	}
 }
