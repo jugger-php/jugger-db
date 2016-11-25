@@ -126,7 +126,7 @@ class WhereTest extends TestCase
                     '><col1' => [1,50],
                     '>!<col2' => [50,100],
                 ],
-                "( BETWEEN  1 AND 50  AND  NOT BETWEEN  50 AND 100 )"
+                "( 'col1' BETWEEN 1 AND 50  AND  'col2' NOT BETWEEN 50 AND 100 )"
             ],
             [
                 [
