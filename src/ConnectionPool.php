@@ -13,9 +13,18 @@ class ConnectionPool extends Singleton implements ArrayAccess
 
     protected $connectionList = [];
 
-    public function init(array $configList)
+    public function init(array $connectionList)
     {
-        foreach ($configList as $name => $data) {
+        $this->connectionList = $connectionList;
+    }
+
+    public function __get($name)
+    {
+        $data = $this->connectionList[$name];
+        if (empty($data)) {
+            return null;
+        }
+        elseif (is_array($data)) {
             $class = $data['class'];
             unset($data['class']);
             $object = new $class();
@@ -23,11 +32,7 @@ class ConnectionPool extends Singleton implements ArrayAccess
 
             $this->connectionList[$name] = $object;
         }
-    }
-
-    public function __get($name)
-    {
-        return $this->connectionList[$name] ?? null;
+        return $this->connectionList[$name];
     }
 
     public static function get($name)
