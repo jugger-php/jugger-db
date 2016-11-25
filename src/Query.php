@@ -100,7 +100,7 @@ class Query
 	}
 
 	public function build() {
-		return (new QueryBuilder($this))->build();
+		return QueryBuilder::build($this);
 	}
 
 	public function query() {
