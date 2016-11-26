@@ -89,17 +89,17 @@ class JoinTest extends TestCase
             [
                 ['t2'],
                 $on,
-                "'t2' ON {$on}"
+                "`t2` ON {$on}"
             ],
             [
                 ['t2' => 'table2'],
                 $on,
-                "'table2' AS 't2' ON {$on}"
+                "`table2` AS `t2` ON {$on}"
             ],
             [
                 ['t2' => (new Query())->from('t3')],
                 $on,
-                "(SELECT * FROM t3) AS 't2' ON {$on}"
+                "(SELECT * FROM t3) AS `t2` ON {$on}"
             ],
         ];
     }
