@@ -1,36 +1,52 @@
 # Connection
 
-Объект соединения с базой данных, является прослойкой между кодом и базой. Любой класс соединения реализует интерфейс `ConnectionInterface`:
+Объект соединения с базой данных, является прослойкой между кодом и базой. Каждый класс соединения реализует интерфейс `ConnectionInterface`, поэтому в своих модулях, вы должны ссылаться именно на этот интерфейс.
 
+Ниже представлен сам интерфейс:
 ```php
 namespace jugger\db;
 
 interface ConnectionInterface
 {
-    /**
-     * Выполняет запрос SELECT и другие, которые возвращают значения
-     * @param  string      $sql запрос
-     * @return QueryResult      объект запроса (даже если ничего не найдено)
-     */
     public function query(string $sql): QueryResult;
-    /**
-     * Выполняет запросы INSERT, UPDATE, DELETE и другие, которые не возвращают данные
-     * @param  string  $sql запрос
-     * @return integer      количество измененых (добавленыъ) строк
-     */
+ 
     public function execute(string $sql);
-    /**
-     * Подготавливает значение
-     * @param  mixed $value значение, которое необходимо подготовить
-     * @return string       значение, защищенное от SQL инъекции
-     */
+ 
     public function escape($value);
-    /**
-     * Оборачивает значение в кавычки
-     * @param  string    $value имя столбца, таблицы, базы
-     * @return string           значение обернутое в кавычки
-     */
+ 
     public function quote(string $value);
 }
 ```
 
+## query
+
+## execute
+
+Данный метод выполняет запросы не возвращающие данные типа `UPDATE`, `INSERT`, `DELETE`, `CREATE`. В качестве возвращаемого значение, отправляется количество затронутых строк.
+
+```php
+$countRows = $conn->execute("INSERT INTO `users` VALUES('login', 'password')");
+```
+
+## escape
+
+Данный метод экранирует строку, тем самым защищая базу от SQL-инъекций.
+
+```php
+$username = $_POST['no-safe-data'];     // "' OR ''='"
+$username = $conn->escape($username);   // "\' OR \'\'=\'"
+
+$sql = "SELECT * FROM users WHERE username = '{$content}'"; // SELECT * FROM users WHERE username = '\' OR \'\'=\''
+```
+
+## quote
+
+Данный метод заключает ключевые слова (названия столбцов, таблиц, баз данных) в специальные символы (зависит от СУБД).
+Результат исполнения следующего кода будет различаться в зависимости от разных реализаций соединений:
+
+**ALERT**: не путать с методом `PDO::quote`, который заключает строку в кавычки и экранирует символы в ней.
+
+```php
+$conn->quote('keyword'); // MySQL: `keyword`
+$conn->quote('keyword'); // MS SQL: [keyword]
+```
