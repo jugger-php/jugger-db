@@ -1,2 +1,1 @@
-# Пул запросов
-
+# Connection pool
