@@ -84,6 +84,7 @@ class QueryBuilder
 	public static function buildOrderBy($orderBy)
 	{
 		$sql = " ORDER BY ";
+		$db = ConnectionPool::get('default');
 
 		if (empty($orderBy)) {
 			return "";
@@ -93,7 +94,13 @@ class QueryBuilder
 		}
 		elseif (is_array($orderBy)) {
 			foreach ($orderBy as $column => $sort) {
-				$sql .= " {$column} {$sort}, ";
+				if (is_integer($column)) {
+					$sql .= " {$sort}, ";
+				}
+				else {
+					$column = $db->quote($column);
+					$sql .= " {$column} {$sort}, ";
+				}
 			}
 			$sql = substr($sql, 0, -2);
 		}
