@@ -23,14 +23,14 @@ class OrderByTest extends TestCase
                 "id ASC, name DESC"
             ],
             [
-                "SELECT * FROM t1 ORDER BY `id` ASC, `name` DESC",
+                "SELECT * FROM t1 ORDER BY  `id` ASC,  `name` DESC",
                 [
                     'id' => 'ASC',
                     'name' => 'DESC',
                 ]
             ],
             [
-                "SELECT * FROM t1 ORDER BY id ASC, RAND()",
+                "SELECT * FROM t1 ORDER BY  id ASC,  RAND()",
                 [
                     'id ASC',
                     'RAND()'
