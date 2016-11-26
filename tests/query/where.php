@@ -93,7 +93,7 @@ class WhereTest extends TestCase
                     ['id' => null],
                     ['id' => true],
                 ],
-                "(('id' = '123') AND ('id' IS  NULL) AND ('id' IS  TRUE))"
+                "((`id` = '123') AND (`id` IS  NULL) AND (`id` IS  TRUE))"
             ],
             [
                 [
@@ -103,7 +103,7 @@ class WhereTest extends TestCase
                     '=col4' => [1,2,3],
                     '=col5' => (new Query())->from('t2'),
                 ],
-                "('col1' = '123' AND 'col2' IS  NULL AND 'col3' IS  TRUE AND 'col4' IN (1,2,3) AND 'col5' IN (SELECT * FROM t2))"
+                "(`col1` = '123' AND `col2` IS  NULL AND `col3` IS  TRUE AND `col4` IN (1,2,3) AND `col5` IN (SELECT * FROM t2))"
             ],
             [
                 [
@@ -111,7 +111,7 @@ class WhereTest extends TestCase
                     '!=col2' => null,
                     '<>col3' => [1,2,3],
                 ],
-                "('col1' <> '123' AND 'col2' IS NOT NULL AND 'col3' NOT IN (1,2,3))"
+                "(`col1` <> '123' AND `col2` IS NOT NULL AND `col3` NOT IN (1,2,3))"
             ],
             [
                 [
@@ -119,14 +119,14 @@ class WhereTest extends TestCase
                     '=col2' => [4,5,6],
                     '@col3' => (new Query())->from('t2'),
                 ],
-                "('col1' IN (1,2,3) AND 'col2' IN (4,5,6) AND 'col3' IN (SELECT * FROM t2))"
+                "(`col1` IN (1,2,3) AND `col2` IN (4,5,6) AND `col3` IN (SELECT * FROM t2))"
             ],
             [
                 [
                     '><col1' => [1,50],
                     '>!<col2' => [50,100],
                 ],
-                "( 'col1' BETWEEN 1 AND 50  AND  'col2' NOT BETWEEN 50 AND 100 )"
+                "( `col1` BETWEEN 1 AND 50  AND  `col2` NOT BETWEEN 50 AND 100 )"
             ],
             [
                 [
@@ -136,7 +136,7 @@ class WhereTest extends TestCase
                     '%col4' => "%str%",
                     '%col5' => (new Query())->from('t'),
                 ],
-                "('col1' LIKE 'str' AND 'col2' LIKE '%str' AND 'col3' LIKE 'str%' AND 'col4' LIKE '%str%' AND 'col5' LIKE (SELECT * FROM t))"
+                "(`col1` LIKE 'str' AND `col2` LIKE '%str' AND `col3` LIKE 'str%' AND `col4` LIKE '%str%' AND `col5` LIKE (SELECT * FROM t))"
             ],
             [
                 [
@@ -145,7 +145,7 @@ class WhereTest extends TestCase
                     '!%col3' => "str%",
                     '!%col4' => "%str%",
                 ],
-                "('col1' NOT LIKE 'str' AND 'col2' NOT LIKE '%str' AND 'col3' NOT LIKE 'str%' AND 'col4' NOT LIKE '%str%')"
+                "(`col1` NOT LIKE 'str' AND `col2` NOT LIKE '%str' AND `col3` NOT LIKE 'str%' AND `col4` NOT LIKE '%str%')"
             ],
             [
                 [
@@ -154,7 +154,7 @@ class WhereTest extends TestCase
                     '<col3' => 3,
                     '<=col4' => 4,
                 ],
-                "('col1'>'1' AND 'col2'>='2' AND 'col3'<'3' AND 'col4'<='4')"
+                "(`col1`>'1' AND `col2`>='2' AND `col3`<'3' AND `col4`<='4')"
             ],
         ];
     }
@@ -178,7 +178,7 @@ class WhereTest extends TestCase
         ]);
         $this->assertEquals(
             $q1->build(),
-            "SELECT * FROM t WHERE (('col1' = '123' AND 'col2' = '123') OR ('col3' = '123'))"
+            "SELECT * FROM t WHERE ((`col1` = '123' AND `col2` = '123') OR (`col3` = '123'))"
         );
 
 
@@ -188,7 +188,7 @@ class WhereTest extends TestCase
         $q2->orWhere(['col3' => 123]);
         $this->assertEquals(
             $q2->build(),
-            "SELECT * FROM t WHERE ((('col1' = '123')) AND ('col2' = '123')) OR ('col3' = '123')"
+            "SELECT * FROM t WHERE (((`col1` = '123')) AND (`col2` = '123')) OR (`col3` = '123')"
         );
 
 
@@ -218,7 +218,7 @@ class WhereTest extends TestCase
 
         $this->assertEquals(
             $q3->build(),
-            "SELECT * FROM t WHERE ('col1' = '1' AND ('col2' = '2' OR ('col3' = '3' AND ('col4' = '4' OR ('col5' = '5' AND 'col6' = '6') OR 'col7' = '7') AND 'col8' = '8') OR 'col9' = '9'))"
+            "SELECT * FROM t WHERE (`col1` = '1' AND (`col2` = '2' OR (`col3` = '3' AND (`col4` = '4' OR (`col5` = '5' AND `col6` = '6') OR `col7` = '7') AND `col8` = '8') OR `col9` = '9'))"
         );
     }
 }
