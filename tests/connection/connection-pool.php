@@ -13,7 +13,7 @@ class PublicConnectionPool extends ConnectionPool
 
 class ConnectionPoolTest extends TestCase
 {
-    public function testInit($table, $on, $sql)
+    public function testInit()
     {
         $connections = [
             'default' => [
@@ -38,10 +38,10 @@ class ConnectionPoolTest extends TestCase
             ],
         ];
 
-        PublicConnectionPool::init($connections);
+        PublicConnectionPool::getInstance()->init($connections);
 
         $connectionList = PublicConnectionPool::getInstance()->getConnectionList();
-        foreach ($connection as $name => $data) {
+        foreach ($connectionList as $name => $data) {
             $this->assertEmpty(array_diff($data, $connectionList[$name]));
         }
     }
@@ -51,7 +51,7 @@ class ConnectionPoolTest extends TestCase
      */
     public function testGetter()
     {
-        ConnectionPool::init([
+        ConnectionPool::getInstance()->init([
             'con1' => [
                 'class' => 'jugger\db\pdo\PdoConnection',
                 'dsn' => 'sqlite::memory:',
