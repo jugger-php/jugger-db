@@ -9,9 +9,17 @@ class LimitTest extends TestCase
     /**
      * @dataProvider dataProvider
      */
-    public function test($sql, $params)
+    public function test($sql, array $params)
     {
-        $q = (new Query())->from('t1')->orderBy($params);
+        list($limit, $offset) = $params;
+        $q = (new Query())->from('t1');
+        if ($offset) {
+            $q->limit($limit, $offset);
+        }
+        else {
+            $q->limit($limit);
+        }
+
         $this->assertEquals($sql, $q->build());
     }
 
@@ -19,22 +27,12 @@ class LimitTest extends TestCase
     {
         return [
             [
-                "SELECT * FROM t1 ORDER BY id ASC, name DESC",
-                "id ASC, name DESC"
+                "SELECT * FROM t1 LIMIT 1",
+                [1, null]
             ],
             [
-                "SELECT * FROM t1 ORDER BY `id` ASC, `name` DESC",
-                [
-                    'id' => 'ASC',
-                    'name' => 'DESC',
-                ]
-            ],
-            [
-                "SELECT * FROM t1 ORDER BY id ASC, RAND()",
-                [
-                    'id ASC',
-                    'RAND()'
-                ]
+                "SELECT * FROM t1 LIMIT 100, 1",
+                [1,100]
             ],
         ];
     }
