@@ -108,7 +108,7 @@ class Query
 		return ConnectionPool::get('default')->query($sql);
 	}
 
-	public function one(): array
+	public function one()
     {
 		$row = $this->query()->fetch();
 		return $row ?? null;
