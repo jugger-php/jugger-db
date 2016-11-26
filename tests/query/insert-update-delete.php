@@ -7,17 +7,15 @@ use jugger\db\ConnectionPool;
 
 class InsertUpdateDeleteTest extends TestCase
 {
-    public $db;
-
-    public function setUp()
+    public static function setUpBeforeClass()
     {
-        $this->db = ConnectionPool::get('default');
-        $this->db->execute("CREATE TABLE 't1' ( 'id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 'name' TEXT, 'content' TEXT, 'update_time' INT );");
+        $sql = "CREATE TABLE `t1` ( `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `content` TEXT, `update_time` INT )";
+        ConnectionPool::get('default')->execute($sql);
     }
 
-    public function tearDown()
+    public static function tearDownAfterClass()
     {
-        $this->db->execute("DROP TABLE t1");
+        ConnectionPool::get('default')->execute("DROP TABLE `t1`");
     }
 
     public function testInsert()
@@ -33,19 +31,13 @@ class InsertUpdateDeleteTest extends TestCase
         $command = QueryBuilder::insert("t1", $values);
         $this->assertEquals(
             $command->getSql(),
-            "INSERT INTO 't1'('name','content','update_time') VALUES('name_val','content_val','1400000000')"
+            "INSERT INTO `t1`(`name`,`content`,`update_time`) VALUES('name_val','content_val','1400000000')"
         );
-        /*
-         * test return value
-         */
-        $rowId = $command->execute();
-        $row = (new Query())->from('t1')
-            ->query()
-            ->fetch();
-        $this->assertTrue($row['id'] == $rowId);
+        $this->assertEquals($command->execute(), 1);
         /*
          * test fetch values
          */
+        $row = (new Query())->from('t1')->one();
         foreach ($values as $column => $value) {
             $this->assertEquals($row[$column], $value);
         }
@@ -61,29 +53,26 @@ class InsertUpdateDeleteTest extends TestCase
             'content' => 'new content',
         ];
         $where = [
-            '>id' => 0,
+            '!id' => null,
         ];
+        $row = (new Query())->from('t1')
+            ->where($where)
+            ->one();
         /*
          * test SQL
          */
         $command = QueryBuilder::update("t1", $values, $where);
         $this->assertEquals(
             $command->getSql(),
-            "UPDATE 't1' SET 'name' = 'new name', 'content' = 'new content'  WHERE 'id'>'0'"
+            "UPDATE `t1` SET `name` = 'new name', `content` = 'new content'  WHERE `id` IS NOT NULL"
         );
-        /*
-         * test return value
-         */
-        $rowId = $command->execute();
-        $row = (new Query())->from('t1')
-            ->where($where)
-            ->query()
-            ->fetch();
-
-        $this->assertTrue($row['id'] == $rowId);
+        $this->assertEquals($command->execute(), 1);
         /*
          * test fetch
          */
+        $row = (new Query())->from('t1')
+            ->where($where)
+            ->one();
         foreach ($values as $column => $value) {
             $this->assertEquals($row[$column], $value);
         }
@@ -94,9 +83,8 @@ class InsertUpdateDeleteTest extends TestCase
      */
     public function testDelete()
     {
-        $row = (new Query())->from('t1')
-            ->query()
-            ->fetch();
+        $row = (new Query())->from('t1')->one();
+        $rowId = $row['id'];
         $where = ['id' => $rowId];
         /*
          * test SQL
@@ -104,21 +92,15 @@ class InsertUpdateDeleteTest extends TestCase
         $command = QueryBuilder::delete("t1", $where);
         $this->assertEquals(
             $command->getSql(),
-            "DELETE FROM 't1' WHERE 'id' = {$rowId}"
+            "DELETE FROM `t1`  WHERE `id` = '{$rowId}'"
         );
-        /*
-         * test ret value
-         */
-        $rowId = $row['id'];
-        $retId = $command->execute();
-        $this->assertEquals($retId, $rowId);
+        $this->assertEquals($command->execute(), 1);
         /*
          * test working delete
          */
         $row = (new Query())->from('t1')
             ->where($where)
-            ->query()
-            ->fetch();
-         $this->assertEmpty($row);
+            ->one();
+        $this->assertEmpty($row);
     }
 }
