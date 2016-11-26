@@ -20,7 +20,7 @@ class ConnectionPool extends Singleton implements ArrayAccess
 
     public function __get($name)
     {
-        $data = $this->connectionList[$name];
+        $data = $this->connectionList[$name] ?? null;
         if (empty($data)) {
             return null;
         }
