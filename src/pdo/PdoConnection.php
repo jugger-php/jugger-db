@@ -47,7 +47,6 @@ class PdoConnection implements ConnectionInterface
 
     public function quote(string $value)
     {
-        $db = $this->getDriver();
-        return $db->quote($value);
+        return "`{$value}`";
     }
 }
