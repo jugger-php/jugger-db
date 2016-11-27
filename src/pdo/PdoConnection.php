@@ -47,6 +47,11 @@ class PdoConnection implements ConnectionInterface
 
     public function quote(string $value)
     {
-        return "`{$value}`";
+        $ret = [];
+        $parts = explode(".", $value);
+        foreach ($parts as $p) {
+            $ret[] = "`{$p}`";
+        }
+        return implode(".", $ret);
     }
 }
