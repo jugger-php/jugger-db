@@ -4,7 +4,7 @@ use PHPUnit\Framework\TestCase;
 use jugger\db\ConnectionPool;
 use jugger\db\Query;
 
-class PdoConnectionTest extends TestCase
+class ConnectionTest extends TestCase
 {
     public static function setUpBeforeClass()
     {
@@ -14,7 +14,7 @@ class PdoConnectionTest extends TestCase
                 'dsn' => 'sqlite::memory:',
             ]
         ]);
-        
+
         $sql = "CREATE TABLE `t2` (`id` INTEGER, `name` TEXT)";
         ConnectionPool::get('default')->execute($sql);
     }
