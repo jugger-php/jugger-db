@@ -9,20 +9,38 @@ namespace jugger\db;
 interface ConnectionInterface
 {
     public function query(string $sql): QueryResult;
- 
+
     public function execute(string $sql);
- 
+
     public function escape($value);
- 
+
     public function quote(string $value);
 }
 ```
 
+Класс реализующий данный интерфейс, должен проходить тест `tests/connection/connection.php`.
+
 ## query
+
+Данные метод выполняет запросы возвращающие данные, типа `SELECT`, `SHOW` и т.д., и возвращает объект `QueryResult`, с помощью которого уже происходит чтение данных.
+
+```php
+$result = $conn->query("SELECT * FROM 'table'");
+
+// получить все строки сразу
+$rows = $result->fetchAll();
+
+// получить все строки последовательным чтением
+$rows = [];
+while ($row = $result->fetch()) {
+    $rows[] = $row;
+}
+
+```
 
 ## execute
 
-Данный метод выполняет запросы не возвращающие данные типа `UPDATE`, `INSERT`, `DELETE`, `CREATE`. В качестве возвращаемого значение, отправляется количество затронутых строк.
+Данный метод выполняет запросы не возвращающие данные, типа `UPDATE`, `INSERT`, `DELETE`, `CREATE` и т.д. В качестве возвращаемого значение, отправляется количество затронутых строк.
 
 ```php
 $countRows = $conn->execute("INSERT INTO `users` VALUES('login', 'password')");
