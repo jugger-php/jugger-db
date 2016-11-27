@@ -3,6 +3,7 @@
 use PHPUnit\Framework\TestCase;
 use jugger\db\ConnectionPool;
 use jugger\db\Query;
+use jugger\db\QueryResult;
 
 class ConnectionTest extends TestCase
 {
@@ -37,9 +38,23 @@ class ConnectionTest extends TestCase
      */
     public function testQuery()
     {
-        $row = (new Query())->from('t2')->where(['id' => 1])->one();
+        $result = ConnectionPool::get('default')->query("SELECT id, name FROM t2");
+        $this->assertInstanceOf(QueryResult::class, $result);
 
+        $row = $result->fetch();
         $this->assertEquals($row['id'], 1);
         $this->assertEquals($row['name'], 'value');
+    }
+
+    public function testQuote()
+    {
+        $db = ConnectionPool::get('default');
+        $data = [
+            "keyword" => "`keyword`",
+            "table_name.column_name" => "`table_name`.`column_name`",
+        ];
+        foreach ($data as $value => $etalon) {
+            $this->assertEquals($etalon, $db->quote($value));
+        }
     }
 }
