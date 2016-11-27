@@ -15,4 +15,4 @@ composer require jugger-php/jugger-db
 
 ## Помощью
 
-Если у вас есть идея или вы нашли баг, то изложить их можете [здесь](https://github.com/jugger-php/jugger-db/issues)
+Если у вас есть идея или вы нашли баг, то изложить их можете [здесь](https://github.com/jugger-php/jugger-db/issues).
