@@ -35,10 +35,9 @@ $rows = [];
 while ($row = $result->fetch()) {
     $rows[] = $row;
 }
+```
 
 (Подробнее)[query-result.md] об `QueryResult`.
-
-```
 
 ## execute
 
