@@ -1,6 +1,6 @@
 # Connection
 
-Объект соединения с базой данных, является прослойкой между кодом и базой. Каждый класс соединения реализует интерфейс `ConnectionInterface`, поэтому в своих модулях, вы должны ссылаться именно на этот интерфейс.
+Объект соединения с базой данных, является прослойкой между кодом и базой. Каждый класс соединения реализует интерфейс `ConnectionInterface`, поэтому в своих модулях, вы должны ссылаться именно на этот интерфейс, а не на конкретную реализацию.
 
 Ниже представлен сам интерфейс:
 ```php
@@ -22,9 +22,10 @@ interface ConnectionInterface
 
 ## query
 
-Данные метод выполняет запросы возвращающие данные, типа `SELECT`, `SHOW` и т.д., и возвращает объект `QueryResult`, с помощью которого уже происходит чтение данных.
+Данный метод выполняет запросы возвращающие данные, типа `SELECT`, `SHOW` и т.д., и возвращает объект `QueryResult`, с помощью которого уже происходит чтение данных.
 
 ```php
+// получаем объект QueryResult
 $result = $conn->query("SELECT * FROM 'table'");
 
 // получить все строки сразу
@@ -37,7 +38,7 @@ while ($row = $result->fetch()) {
 }
 ```
 
-(Подробнее)[query-result.md] об `QueryResult`.
+[Подробнее](query-result.md) об `QueryResult`.
 
 ## execute
 
@@ -53,9 +54,13 @@ $countRows = $conn->execute("INSERT INTO `users` VALUES('login', 'password')");
 
 ```php
 $username = $_POST['no-safe-data'];     // "' OR ''='"
-$username = $conn->escape($username);   // "\' OR \'\'=\'"
+$usernameEscaped = $conn->escape($username);   // "\' OR \'\'=\'"
 
-$sql = "SELECT * FROM users WHERE username = '{$content}'"; // SELECT * FROM users WHERE username = '\' OR \'\'=\''
+// SELECT * FROM users WHERE username = '' OR ''=''
+$sql = "SELECT * FROM users WHERE username = '{$username}'";
+
+// SELECT * FROM users WHERE username = '\' OR \'\'=\''
+$sql = "SELECT * FROM users WHERE username = '{$usernameEscaped}'";
 ```
 
 ## quote
@@ -63,9 +68,9 @@ $sql = "SELECT * FROM users WHERE username = '{$content}'"; // SELECT * FROM use
 Данный метод заключает ключевые слова (названия столбцов, таблиц, баз данных) в специальные символы (зависит от СУБД).
 Результат исполнения следующего кода будет различаться в зависимости от разных реализаций соединений:
 
-**ALERT**: не путать с методом `PDO::quote`, который заключает строку в кавычки и экранирует символы в ней.
-
 ```php
 $conn->quote('keyword'); // MySQL: `keyword`
 $conn->quote('keyword'); // MS SQL: [keyword]
 ```
+
+**ВНИМАНИЕ**: не путать с методом `PDO::quote`, который заключает строку в кавычки и экранирует символы в ней.
