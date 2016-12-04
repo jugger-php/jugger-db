@@ -27,16 +27,16 @@ class PdoConnection implements ConnectionInterface
         return new PdoQueryResult($stmt);
     }
 
-    public function execute(string $sql)
+    public function execute(string $sql): int
     {
         $db = $this->getDriver();
         return $db->exec($sql);
     }
 
-    public function escape($value)
+    public function escape($value): string
     {
         if (ctype_digit($value)) {
-            return (int) $value;
+            return (string) intval($value);
         }
         else {
             // protection against SQL injection
@@ -45,7 +45,7 @@ class PdoConnection implements ConnectionInterface
         }
     }
 
-    public function quote(string $value)
+    public function quote(string $value): string
     {
         $ret = [];
         $parts = explode(".", $value);
@@ -53,5 +53,25 @@ class PdoConnection implements ConnectionInterface
             $ret[] = "`{$p}`";
         }
         return implode(".", $ret);
+    }
+
+    public function beginTransaction()
+    {
+        $this->getDriver()->beginTransaction();
+    }
+
+    public function commit()
+    {
+        $this->getDriver()->commit();
+    }
+
+    public function rollBack()
+    {
+        $this->getDriver()->rollBack();
+    }
+
+    public function getLastInsertId($tableName = null): int
+    {
+        return $this->getDriver()->lastInsertId($tableName);
     }
 }
