@@ -1,10 +1,7 @@
 <phpunit bootstrap="tests/bootstrap.php">
     <testsuites>
-        <testsuite name="query">
-            <directory suffix='.php'>tests/query</directory>
-        </testsuite>
-        <testsuite name="connection">
-            <directory suffix='.php'>tests/connection</directory>
+        <testsuite name="all">
+            <directory suffix='.php'>tests</directory>
         </testsuite>
     </testsuites>
 </phpunit>
