@@ -8,12 +8,15 @@ use jugger\db\ConnectionInterface;
 class PdoConnection implements ConnectionInterface
 {
     public $dsn;
+    public $username;
+    public $password;
+    public $options;
 
     public function getDriver()
     {
         static $driver = null;
         if (!$driver) {
-            $driver = new PDO($this->dsn);
+            $driver = new PDO($this->dsn, $this->username, $this->password, $this->options);
             $driver->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         }
         return $driver;

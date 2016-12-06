@@ -1,0 +1,25 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	0	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+QueryBuilder	C:\Users\user\Documents\projects\jugger\vendor\jugger-php\jugger-db\src\QueryBuilder.php	/^class QueryBuilder$/;"	class	line:7
+insert	C:\Users\user\Documents\projects\jugger\vendor\jugger-php\jugger-db\src\QueryBuilder.php	/^	public static function insert(string $tableName, array $values)$/;"	function	line:9
+update	C:\Users\user\Documents\projects\jugger\vendor\jugger-php\jugger-db\src\QueryBuilder.php	/^	public static function update(string $tableName, array $columns, $where)$/;"	function	line:28
+delete	C:\Users\user\Documents\projects\jugger\vendor\jugger-php\jugger-db\src\QueryBuilder.php	/^	public static function delete(string $tableName, $where)$/;"	function	line:46
+build	C:\Users\user\Documents\projects\jugger\vendor\jugger-php\jugger-db\src\QueryBuilder.php	/^	public static function build(Query $query)$/;"	function	line:56
+buildLimitOffset	C:\Users\user\Documents\projects\jugger\vendor\jugger-php\jugger-db\src\QueryBuilder.php	/^	public static function buildLimitOffset($limit, $offset = 0)$/;"	function	line:68
+buildOrderBy	C:\Users\user\Documents\projects\jugger\vendor\jugger-php\jugger-db\src\QueryBuilder.php	/^	public static function buildOrderBy($orderBy)$/;"	function	line:84
+buildGroupBy	C:\Users\user\Documents\projects\jugger\vendor\jugger-php\jugger-db\src\QueryBuilder.php	/^	public static function buildGroupBy($groupBy)$/;"	function	line:111
+buildHaving	C:\Users\user\Documents\projects\jugger\vendor\jugger-php\jugger-db\src\QueryBuilder.php	/^	public static function buildHaving($having)$/;"	function	line:132
+buildSelect	C:\Users\user\Documents\projects\jugger\vendor\jugger-php\jugger-db\src\QueryBuilder.php	/^	public static function buildSelect($select)$/;"	function	line:141
+buildFrom	C:\Users\user\Documents\projects\jugger\vendor\jugger-php\jugger-db\src\QueryBuilder.php	/^	public static function buildFrom($from)$/;"	function	line:171
+buildJoin	C:\Users\user\Documents\projects\jugger\vendor\jugger-php\jugger-db\src\QueryBuilder.php	/^	public static function buildJoin($join)$/;"	function	line:198
+buildWhere	C:\Users\user\Documents\projects\jugger\vendor\jugger-php\jugger-db\src\QueryBuilder.php	/^	public static function buildWhere($where)$/;"	function	line:238
+buildWhereComplex	C:\Users\user\Documents\projects\jugger\vendor\jugger-php\jugger-db\src\QueryBuilder.php	/^	public static function buildWhereComplex(array $columns)$/;"	function	line:258
+parseOperator	C:\Users\user\Documents\projects\jugger\vendor\jugger-php\jugger-db\src\QueryBuilder.php	/^	public static function parseOperator(string $key)$/;"	function	line:293
+buildWhereSimple	C:\Users\user\Documents\projects\jugger\vendor\jugger-php\jugger-db\src\QueryBuilder.php	/^	public static function buildWhereSimple(string $column, string $operator, $value)$/;"	function	line:302
+equalOperator	C:\Users\user\Documents\projects\jugger\vendor\jugger-php\jugger-db\src\QueryBuilder.php	/^	public static function equalOperator(string $column, $value, bool $isNot = false)$/;"	function	line:355
+inOperator	C:\Users\user\Documents\projects\jugger\vendor\jugger-php\jugger-db\src\QueryBuilder.php	/^	public static function inOperator(string $column, $value, bool $isNot = false)$/;"	function	line:379
+betweenOperator	C:\Users\user\Documents\projects\jugger\vendor\jugger-php\jugger-db\src\QueryBuilder.php	/^	public static function betweenOperator(string $column, array $value, bool $isNot = false)$/;"	function	line:400
