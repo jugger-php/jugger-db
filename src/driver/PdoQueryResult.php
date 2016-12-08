@@ -1,5 +1,5 @@
 <?php
-namespace jugger\db\pdo;
+namespace jugger\db\driver;
 
 use PDO;
 use PDOStatement;

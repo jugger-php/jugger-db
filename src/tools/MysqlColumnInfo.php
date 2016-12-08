@@ -13,7 +13,7 @@ class MysqlColumnInfo implements ColumnInfoInterface
 
     public function getName(): string
     {
-
+        
     }
 
     public function getType(): array

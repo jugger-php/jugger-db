@@ -3,23 +3,28 @@
 namespace jugger\db\tools;
 
 use jugger\db\Query;
-use jugger\db\Connection;
 use jugger\db\ConnectionPool;
+use jugger\db\ConnectionInterface;
 
 class MysqlTableInfo implements TableInfoInterface
 {
     public $db;
     public $tableName;
 
-    public function __construct(string $tableName, Connection $db = null)
+    public function __construct(string $tableName, ConnectionInterface $db)
     {
+        $this->db = $db;
         $this->tableName = $tableName;
-        $this->db = $db ?? ConnectionPool::get('default');
     }
 
     public function getColumns(): array
     {
+        $sql = "SHOW COLUMNS FROM {$this->tableName}";
+        $result = $this->db->query($sql);
         $columns = [];
+        while ($row = $result->fetch()) {
+            $columns[] = new MysqlColumnInfo($row);
+        }
         return $columns;
     }
 }

@@ -11,28 +11,39 @@ class ConnectionPool extends Singleton implements ArrayAccess
 {
     use ArrayAccessTrait;
 
-    protected $connectionList = [];
+    protected $connections = [];
+    protected $connectionsCache = [];
 
-    public function init(array $connectionList)
+    public function init(array $connections)
     {
-        $this->connectionList = $connectionList;
+        $this->connections = $connections;
+    }
+
+    public function getConnections()
+    {
+        return $this->connections;
     }
 
     public function __get($name)
     {
-        $data = $this->connectionList[$name] ?? null;
-        if (empty($data)) {
+        $cache = $this->connectionsCache[$name] ?? null;
+        if ($cache) {
+            return $cache;
+        }
+
+        $config = $this->connections[$name] ?? null;
+        if (empty($config)) {
             return null;
         }
-        elseif (is_array($data)) {
-            $class = $data['class'];
-            unset($data['class']);
+        else {
+            $class = $config['class'];
+            unset($config['class']);
             $object = new $class();
-            Configurator::setValues($object, $data);
+            Configurator::setValues($object, $config);
 
-            $this->connectionList[$name] = $object;
+            $this->connectionsCache[$name] = $object;
         }
-        return $this->connectionList[$name];
+        return $this->connectionsCache[$name];
     }
 
     public static function get($name)

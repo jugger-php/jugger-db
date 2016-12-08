@@ -11,7 +11,7 @@ use jugger\db\ConnectionPool;
 
 ConnectionPool::getInstance()->init([
     'default' => [
-        'class' => 'jugger\db\pdo\PdoConnection',
+        'class' => 'jugger\db\driver\PdoConnection',
         'dsn' => 'sqlite::memory:',
     ],
     // общая схема соединения

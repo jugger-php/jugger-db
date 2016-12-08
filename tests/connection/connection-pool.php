@@ -3,21 +3,13 @@
 use PHPUnit\Framework\TestCase;
 use jugger\db\ConnectionPool;
 
-class PublicConnectionPool extends ConnectionPool
-{
-    public function getConnectionList()
-    {
-        return $this->connectionList;
-    }
-}
-
 class ConnectionPoolTest extends TestCase
 {
     public function testInit()
     {
         $connections = [
             'default' => [
-                'class' => 'jugger\db\pdo\PdoConnection',
+                'class' => 'jugger\db\driver\PdoConnection',
                 'dsn' => 'sqlite::memory:',
             ],
             'connection1' => [
@@ -38,10 +30,10 @@ class ConnectionPoolTest extends TestCase
             ],
         ];
 
-        PublicConnectionPool::getInstance()->init($connections);
+        ConnectionPool::getInstance()->init($connections);
 
-        $connectionList = PublicConnectionPool::getInstance()->getConnectionList();
-        foreach ($connectionList as $name => $data) {
+        $connectionList = ConnectionPool::getInstance()->getConnections();
+        foreach ($connections as $name => $data) {
             $this->assertEmpty(array_diff($data, $connectionList[$name]));
         }
     }
@@ -53,17 +45,29 @@ class ConnectionPoolTest extends TestCase
     {
         ConnectionPool::getInstance()->init([
             'con1' => [
-                'class' => 'jugger\db\pdo\PdoConnection',
+                'class' => 'jugger\db\driver\PdoConnection',
                 'dsn' => 'sqlite::memory:',
-            ]
+            ],
+            'connection2' => [
+                'class' => 'jugger\db\driver\PdoConnection',
+                'dsn' => 'mysql:localhost;dbname=test',
+                'username' => 'root',
+                'password' => '',
+            ],
         ]);
 
         $obj1 = ConnectionPool::get('con1');
         $obj2 = ConnectionPool::getInstance()['con1'];
 
-        $this->assertFalse(is_null($obj1));
-        $this->assertFalse(is_null($obj2));
+        $this->assertNotNull($obj1);
+        $this->assertNotNull($obj2);
 
         $this->assertEquals($obj1, $obj2);
+
+        $obj3 = ConnectionPool::get('connection2');
+        $obj4 = ConnectionPool::get('not found connection');
+
+        $this->assertNotEquals($obj1, $obj3);
+        $this->assertNull($obj4);
     }
 }
