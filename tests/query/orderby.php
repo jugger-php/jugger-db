@@ -5,13 +5,17 @@ use jugger\db\Query;
 
 class OrderByTest extends TestCase
 {
+    public function db()
+    {
+        return Di::$pool['default'];
+    }
 
     /**
      * @dataProvider dataProvider
      */
     public function test($sql, $params)
     {
-        $q = (new Query())->from('t1')->orderBy($params);
+        $q = (new Query($this->db()))->from('t1')->orderBy($params);
         $this->assertEquals($sql, $q->build());
     }
 

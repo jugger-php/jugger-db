@@ -5,6 +5,10 @@ use jugger\db\Query;
 
 class HavingTest extends TestCase
 {
+    public function db()
+    {
+        return Di::$pool['default'];
+    }
 
     /**
      *
@@ -12,7 +16,7 @@ class HavingTest extends TestCase
      */
     public function test($sql, $params)
     {
-        $q = (new Query())->from('t1')->having($params);
+        $q = (new Query($this->db()))->from('t1')->having($params);
         $this->assertEquals($sql, $q->build());
     }
 

@@ -1,9 +1,0 @@
-!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
-!_TAG_FILE_SORTED	0	/0=unsorted, 1=sorted, 2=foldcase/
-!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
-!_TAG_PROGRAM_NAME	Exuberant Ctags	//
-!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
-!_TAG_PROGRAM_VERSION	5.8	//
-MysqlTableInfo	C:\Users\user\Documents\projects\jugger\vendor\jugger-php\jugger-db\src\tools\MysqlTableInfo.php	/^class MysqlTableInfo implements TableInfoInterface$/;"	class	line:9
-__construct	C:\Users\user\Documents\projects\jugger\vendor\jugger-php\jugger-db\src\tools\MysqlTableInfo.php	/^    public function __construct(string $tableName, ConnectionInterface $db)$/;"	function	line:14
-getColumns	C:\Users\user\Documents\projects\jugger\vendor\jugger-php\jugger-db\src\tools\MysqlTableInfo.php	/^    public function getColumns(): array$/;"	function	line:20

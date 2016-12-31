@@ -5,6 +5,10 @@ use jugger\db\Query;
 
 class LimitTest extends TestCase
 {
+    public function db()
+    {
+        return Di::$pool['default'];
+    }
 
     /**
      * @dataProvider dataProvider
@@ -12,7 +16,7 @@ class LimitTest extends TestCase
     public function test($sql, array $params)
     {
         list($limit, $offset) = $params;
-        $q = (new Query())->from('t1');
+        $q = (new Query($this->db()))->from('t1');
         if ($offset) {
             $q->limit($limit, $offset);
         }

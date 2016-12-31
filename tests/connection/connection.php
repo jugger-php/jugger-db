@@ -9,36 +9,28 @@ class ConnectionTest extends TestCase
 {
     public static function setUpBeforeClass()
     {
-        ConnectionPool::getInstance()->init([
-            'default' => [
-                'class' => 'jugger\db\driver\PdoConnection',
-                'dsn' => 'sqlite::memory:',
-            ]
-        ]);
-
         $sql = "CREATE TABLE `t2` (`id` INTEGER, `name` TEXT)";
-        ConnectionPool::get('default')->execute($sql);
+        Di::$pool['default']->execute($sql);
     }
 
     public static function tearDownAfterClass()
     {
-        ConnectionPool::get('default')->execute("DROP TABLE `t2`");
+        Di::$pool['default']->execute("DROP TABLE `t2`");
     }
 
-    public function testExecute()
+    public function testExecuteDb()
     {
-        $db = ConnectionPool::get('default');
+        $db = Di::$pool['default'];
         $sql = "INSERT INTO `t2` VALUES(1, 'value')";
-
-        $this->assertEquals($db->execute($sql), 1);
+        $this->assertTrue($db->execute($sql) == 1);
     }
 
     /**
-     * @depends testExecute
+     * @depends testExecuteDb
      */
     public function testQuery()
     {
-        $result = ConnectionPool::get('default')->query("SELECT id, name FROM t2");
+        $result = Di::$pool['default']->query("SELECT id, name FROM t2");
         $this->assertInstanceOf(QueryResult::class, $result);
 
         $row = $result->fetch();
@@ -48,7 +40,7 @@ class ConnectionTest extends TestCase
 
     public function testQuote()
     {
-        $db = ConnectionPool::get('default');
+        $db = Di::$pool['default'];
         $data = [
             "keyword" => "`keyword`",
             "table_name.column_name" => "`table_name`.`column_name`",

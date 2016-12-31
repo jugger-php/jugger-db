@@ -5,13 +5,18 @@ use jugger\db\Query;
 
 class SelectFromTest extends TestCase
 {
+    public function db()
+    {
+        return Di::$pool['default'];
+    }
+
     /**
      * Проверка генерации блока SELECT
      * @dataProvider selectProvider
      */
     public function testSelect($select, $sql)
     {
-        $q = (new Query())->select($select)->from('t');
+        $q = (new Query($this->db()))->select($select)->from('t');
         $this->assertEquals(
             $q->build(),
             'SELECT '. $sql .' FROM t'
@@ -38,7 +43,7 @@ class SelectFromTest extends TestCase
                 "`col1` AS `c1`",
             ],
             [
-                ["c1" => (new Query())->from('t2')],
+                ["c1" => (new Query($this->db()))->from('t2')],
                 "(SELECT * FROM t2) AS `c1`",
             ],
         ];
@@ -50,7 +55,7 @@ class SelectFromTest extends TestCase
      */
     public function testFrom($from, $sql)
     {
-        $q = (new Query())->from($from);
+        $q = (new Query($this->db()))->from($from);
         $this->assertEquals(
             $q->build(),
             'SELECT * FROM '.$sql
@@ -73,7 +78,7 @@ class SelectFromTest extends TestCase
                 "`table1` AS `t1`",
             ],
             [
-                ["t1" => (new Query())->from('t2')],
+                ["t1" => (new Query($this->db()))->from('t2')],
                 "(SELECT * FROM t2) AS `t1`",
             ],
         ];

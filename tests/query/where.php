@@ -5,6 +5,11 @@ use jugger\db\Query;
 
 class WhereTest extends TestCase
 {
+    public function db()
+    {
+        return Di::$pool['default'];
+    }
+
     /**
      * Проверяет равнозначность различных вариантов записи
      * @dataProvider equivalentProvider
@@ -13,7 +18,7 @@ class WhereTest extends TestCase
     {
         $sqls = [];
         foreach ($values as $value) {
-            $sqls[] = (new Query())->from('t')
+            $sqls[] = (new Query($this->db()))->from('t')
                 ->where($value)
                 ->build();
         }
@@ -31,7 +36,7 @@ class WhereTest extends TestCase
         $number = 123;
         $array = [1,2,3];
         $string = "SELECT * FROM t";
-        $query = (new Query())->from('t');
+        $query = (new Query($this->db()))->from('t');
 
         return [
             [
@@ -72,7 +77,7 @@ class WhereTest extends TestCase
      */
     public function testOperators($value, $sql)
     {
-        $q = (new Query())->from('t')->where($value);
+        $q = (new Query($this->db()))->from('t')->where($value);
 
         $this->assertEquals(
             $q->build(),
@@ -100,26 +105,26 @@ class WhereTest extends TestCase
                     '=col1' => 123,
                     '=col2' => null,
                     '=col3' => true,
-                    '=col4' => [1,2,3],
-                    '=col5' => (new Query())->from('t2'),
+                    '=col4' => [1,'test',3.14],
+                    '=col5' => (new Query($this->db()))->from('t2'),
                 ],
-                "(`col1` = '123' AND `col2` IS  NULL AND `col3` IS  TRUE AND `col4` IN (1,2,3) AND `col5` IN (SELECT * FROM t2))"
+                "(`col1` = '123' AND `col2` IS  NULL AND `col3` IS  TRUE AND `col4` IN ('1', 'test', '3.14') AND `col5` IN (SELECT * FROM t2))"
             ],
             [
                 [
                     '!col1' => 123,
                     '!=col2' => null,
-                    '<>col3' => [1,2,3],
+                    '<>col3' => [1,'test',3.14],
                 ],
-                "(`col1` <> '123' AND `col2` IS NOT NULL AND `col3` NOT IN (1,2,3))"
+                "(`col1` <> '123' AND `col2` IS NOT NULL AND `col3` NOT IN ('1', 'test', '3.14'))"
             ],
             [
                 [
                     'col1' => [1,2,3],
                     '=col2' => [4,5,6],
-                    '@col3' => (new Query())->from('t2'),
+                    '@col3' => (new Query($this->db()))->from('t2'),
                 ],
-                "(`col1` IN (1,2,3) AND `col2` IN (4,5,6) AND `col3` IN (SELECT * FROM t2))"
+                "(`col1` IN ('1', '2', '3') AND `col2` IN ('4', '5', '6') AND `col3` IN (SELECT * FROM t2))"
             ],
             [
                 [
@@ -134,7 +139,7 @@ class WhereTest extends TestCase
                     '%col2' => "%str",
                     '%col3' => "str%",
                     '%col4' => "%str%",
-                    '%col5' => (new Query())->from('t'),
+                    '%col5' => (new Query($this->db()))->from('t'),
                 ],
                 "(`col1` LIKE 'str' AND `col2` LIKE '%str' AND `col3` LIKE 'str%' AND `col4` LIKE '%str%' AND `col5` LIKE (SELECT * FROM t))"
             ],
@@ -164,7 +169,7 @@ class WhereTest extends TestCase
      */
     public function testLogic()
     {
-        $q1 = (new Query())->from('t');
+        $q1 = (new Query($this->db()))->from('t');
         $q1->where([
             'or',
             [
@@ -182,7 +187,7 @@ class WhereTest extends TestCase
         );
 
 
-        $q2 = (new Query())->from('t');
+        $q2 = (new Query($this->db()))->from('t');
         $q2->where(['col1' => 123]);
         $q2->andWhere(['col2' => 123]);
         $q2->orWhere(['col3' => 123]);
@@ -192,7 +197,7 @@ class WhereTest extends TestCase
         );
 
 
-        $q3 = (new Query())->from('t');
+        $q3 = (new Query($this->db()))->from('t');
         $q3->where([
             'col1' => 1,
             [

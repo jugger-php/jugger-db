@@ -2,24 +2,30 @@
 
 use PHPUnit\Framework\TestCase;
 use jugger\db\Query;
-use jugger\db\QueryBuilder;
+use jugger\db\Command;
 use jugger\db\ConnectionPool;
 
 class InsertUpdateDeleteTest extends TestCase
 {
+    public function db()
+    {
+        return Di::$pool['default'];
+    }
+
     public static function setUpBeforeClass()
     {
         $sql = "CREATE TABLE `t1` ( `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `content` TEXT, `update_time` INT )";
-        ConnectionPool::get('default')->execute($sql);
+        Di::$pool['default']->execute($sql);
     }
 
     public static function tearDownAfterClass()
     {
-        ConnectionPool::get('default')->execute("DROP TABLE `t1`");
+        Di::$pool['default']->execute("DROP TABLE `t1`");
     }
 
     public function testInsert()
     {
+        $db = $this->db();
         $values = [
             'name' => 'name_val',
             'content' => 'content_val',
@@ -28,7 +34,7 @@ class InsertUpdateDeleteTest extends TestCase
         /*
          * test SQL
          */
-        $command = QueryBuilder::insert("t1", $values);
+        $command = (new Command($db))->insert("t1", $values);
         $this->assertEquals(
             $command->getSql(),
             "INSERT INTO `t1`(`name`,`content`,`update_time`) VALUES('name_val','content_val','1400000000')"
@@ -37,7 +43,7 @@ class InsertUpdateDeleteTest extends TestCase
         /*
          * test fetch values
          */
-        $row = (new Query())->from('t1')->one();
+        $row = (new Query($db))->from('t1')->one();
         foreach ($values as $column => $value) {
             $this->assertEquals($row[$column], $value);
         }
@@ -48,6 +54,7 @@ class InsertUpdateDeleteTest extends TestCase
      */
     public function testUpdate()
     {
+        $db = $this->db();
         $values = [
             'name' => 'new name',
             'content' => 'new content',
@@ -55,13 +62,13 @@ class InsertUpdateDeleteTest extends TestCase
         $where = [
             '!id' => null,
         ];
-        $row = (new Query())->from('t1')
+        $row = (new Query($db))->from('t1')
             ->where($where)
             ->one();
         /*
          * test SQL
          */
-        $command = QueryBuilder::update("t1", $values, $where);
+        $command = (new Command($db))->update("t1", $values, $where);
         $this->assertEquals(
             $command->getSql(),
             "UPDATE `t1` SET `name` = 'new name', `content` = 'new content'  WHERE `id` IS NOT NULL"
@@ -70,7 +77,7 @@ class InsertUpdateDeleteTest extends TestCase
         /*
          * test fetch
          */
-        $row = (new Query())->from('t1')
+        $row = (new Query($db))->from('t1')
             ->where($where)
             ->one();
         foreach ($values as $column => $value) {
@@ -83,13 +90,15 @@ class InsertUpdateDeleteTest extends TestCase
      */
     public function testDelete()
     {
-        $row = (new Query())->from('t1')->one();
+        $db = $this->db();
+
+        $row = (new Query($db))->from('t1')->one();
         $rowId = $row['id'];
         $where = ['id' => $rowId];
         /*
          * test SQL
          */
-        $command = QueryBuilder::delete("t1", $where);
+        $command = (new Command($db))->delete("t1", $where);
         $this->assertEquals(
             $command->getSql(),
             "DELETE FROM `t1`  WHERE `id` = '{$rowId}'"
@@ -98,7 +107,7 @@ class InsertUpdateDeleteTest extends TestCase
         /*
          * test working delete
          */
-        $row = (new Query())->from('t1')
+        $row = (new Query($db))->from('t1')
             ->where($where)
             ->one();
         $this->assertEmpty($row);

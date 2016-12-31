@@ -5,6 +5,11 @@ use jugger\db\Query;
 
 class JoinTest extends TestCase
 {
+    public function db()
+    {
+        return Di::$pool['default'];
+    }
+
     /**
      * Тест эквивалентности различных типов связи
      */
@@ -13,24 +18,24 @@ class JoinTest extends TestCase
         $t2 = 't2';
         $on = 't.id = t2.id';
 
-        $q11 = (new Query())->from('t')->join('LEFT', $t2, $on);
-        $q12 = (new Query())->from('t')->leftJoin($t2, $on);
+        $q11 = (new Query($this->db()))->from('t')->join('LEFT', $t2, $on);
+        $q12 = (new Query($this->db()))->from('t')->leftJoin($t2, $on);
         $this->assertEquals(
             $q11->build(),
             $q12->build(),
             "SELECT * FROM t LEFT JOIN t2 ON {$on}"
         );
 
-        $q21 = (new Query())->from('t')->join('RIGHT', $t2, $on);
-        $q22 = (new Query())->from('t')->rightJoin($t2, $on);
+        $q21 = (new Query($this->db()))->from('t')->join('RIGHT', $t2, $on);
+        $q22 = (new Query($this->db()))->from('t')->rightJoin($t2, $on);
         $this->assertEquals(
             $q21->build(),
             $q22->build(),
             "SELECT * FROM t RIGHT JOIN t2 ON {$on}"
         );
 
-        $q31 = (new Query())->from('t')->join('INNER', $t2, $on);
-        $q32 = (new Query())->from('t')->innerJoin($t2, $on);
+        $q31 = (new Query($this->db()))->from('t')->join('INNER', $t2, $on);
+        $q32 = (new Query($this->db()))->from('t')->innerJoin($t2, $on);
         $this->assertEquals(
             $q31->build(),
             $q32->build(),
@@ -45,7 +50,7 @@ class JoinTest extends TestCase
      */
     public function testMany()
     {
-        $query = (new Query())->from('t');
+        $query = (new Query($this->db()))->from('t');
         $query->leftJoin('t2', 't.id = t2.tid');
         $query->rightJoin('t3', 't.id = t3.tid');
         $query->innerJoin('t4', 't.id = t4.tid');
@@ -69,7 +74,7 @@ class JoinTest extends TestCase
      */
     public function testJoin($table, $on, $sql)
     {
-        $q = (new Query())->from('t')->innerJoin($table, $on);
+        $q = (new Query($this->db()))->from('t')->innerJoin($table, $on);
 
         $this->assertEquals(
             trim($q->build()),
@@ -97,7 +102,7 @@ class JoinTest extends TestCase
                 "`table2` AS `t2` ON {$on}"
             ],
             [
-                ['t2' => (new Query())->from('t3')],
+                ['t2' => (new Query($this->db()))->from('t3')],
                 $on,
                 "(SELECT * FROM t3) AS `t2` ON {$on}"
             ],
