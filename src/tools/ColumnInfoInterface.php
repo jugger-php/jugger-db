@@ -21,9 +21,14 @@ interface ColumnInfoInterface
     public function getName(): string;
     /**
      * Тип
-     * @return array массив, первый элемент 'тип', второй элемент 'размер'
+     * @return string название типа
      */
-    public function getType(): array;
+    public function getType(): string;
+    /**
+     * Размер
+     * @return int размер, либо 0 если неограничено
+     */
+    public function getSize(): int;
     /**
      * Индекс
      * @return [type] [description]
@@ -41,7 +46,7 @@ interface ColumnInfoInterface
     public function getDefault(): string;
     /**
      * Другие параметры специфичные для каждоый базы данных
-     * @return array список параметров
+     * @return string список параметров
      */
-    public function getOther(): array;
+    public function getOther(): string;
 }
