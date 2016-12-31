@@ -35,5 +35,5 @@ interface ConnectionInterface
 
     public function rollBack();
 
-    public function getLastInsertId($tableName = null): int;
+    public function getLastInsertId($tableName = null): string;
 }
