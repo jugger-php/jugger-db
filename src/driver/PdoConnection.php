@@ -1,7 +1,6 @@
 <?php
 namespace jugger\db\driver;
 
-use PDO;
 use jugger\db\QueryResult;
 use jugger\db\ConnectionInterface;
 
@@ -16,8 +15,8 @@ class PdoConnection implements ConnectionInterface
     {
         static $driver = null;
         if (!$driver) {
-            $driver = new PDO($this->dsn, $this->username, $this->password, $this->options);
-            $driver->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $driver = new \PDO($this->dsn, $this->username, $this->password, $this->options);
+            $driver->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         }
         return $driver;
     }
@@ -73,7 +72,7 @@ class PdoConnection implements ConnectionInterface
         $this->getDriver()->rollBack();
     }
 
-    public function getLastInsertId($tableName = null): int
+    public function getLastInsertId($tableName = null): string
     {
         return $this->getDriver()->lastInsertId($tableName);
     }
