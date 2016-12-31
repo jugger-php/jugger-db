@@ -6,7 +6,7 @@ use jugger\db\Query;
 use jugger\db\ConnectionPool;
 use jugger\db\ConnectionInterface;
 
-class MysqlTableInfo implements TableInfoInterface
+class MysqlTableInfo
 {
     public $db;
     public $tableName;
@@ -23,7 +23,8 @@ class MysqlTableInfo implements TableInfoInterface
         $result = $this->db->query($sql);
         $columns = [];
         while ($row = $result->fetch()) {
-            $columns[] = new MysqlColumnInfo($row);
+            $value = new MysqlColumnInfo($row);
+            $columns[$value->getName()] = $value;
         }
         return $columns;
     }
