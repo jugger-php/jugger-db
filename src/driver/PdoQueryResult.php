@@ -1,16 +1,13 @@
 <?php
 namespace jugger\db\driver;
 
-use PDO;
-use PDOStatement;
-use Exception;
 use jugger\db\QueryResult;
 
 class PdoQueryResult extends QueryResult
 {
     protected $statement;
 
-    public function __construct(PDOStatement $statement)
+    public function __construct(\PDOStatement $statement)
     {
         $this->statement = $statement;
         $this->statement->execute();
@@ -18,11 +15,11 @@ class PdoQueryResult extends QueryResult
 
     public function fetch()
     {
-        return $this->statement->fetch(PDO::FETCH_ASSOC);
+        return $this->statement->fetch(\PDO::FETCH_ASSOC);
     }
 
     public function fetchAll()
     {
-        return $this->statement->fetchAll(PDO::FETCH_ASSOC);
+        return $this->statement->fetchAll(\PDO::FETCH_ASSOC);
     }
 }
