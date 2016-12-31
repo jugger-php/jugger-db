@@ -2,19 +2,17 @@
 
 namespace jugger\db;
 
-use ArrayAccess;
-use jugger\base\Singleton;
 use jugger\base\Configurator;
 use jugger\base\ArrayAccessTrait;
 
-class ConnectionPool extends Singleton implements ArrayAccess
+class ConnectionPool implements \ArrayAccess
 {
     use ArrayAccessTrait;
 
     protected $connections = [];
     protected $connectionsCache = [];
 
-    public function init(array $connections)
+    public function __construct(array $connections = [])
     {
         $this->connections = $connections;
     }
@@ -44,10 +42,5 @@ class ConnectionPool extends Singleton implements ArrayAccess
             $this->connectionsCache[$name] = $object;
         }
         return $this->connectionsCache[$name];
-    }
-
-    public static function get($name)
-    {
-        return self::getInstance()[$name];
     }
 }
