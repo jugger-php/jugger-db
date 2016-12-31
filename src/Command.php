@@ -12,9 +12,10 @@ class Command
         $this->db = $db;
     }
 
-    public function setSql(string $sql)
+    public function setSql(string $sql): Command
     {
         $this->sql = $sql;
+        return $this;
     }
 
     public function getSql(): string
@@ -22,7 +23,7 @@ class Command
         return $this->sql;
     }
 
-    public function execute()
+    public function execute(): int
     {
         return $this->db->execute($this->sql);
     }
