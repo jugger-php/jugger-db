@@ -13,14 +13,30 @@ class QueryBuilder
 
 	public function build(Query $query): string
 	{
-		return $this->buildSelect($query->select) .
-			$this->buildFrom($query->from) .
-			$this->buildJoin($query->join) .
-			$this->buildWhere($query->where) .
-			$this->buildGroupBy($query->groupBy) .
-			$this->buildHaving($query->having) .
-			$this->buildOrderBy($query->orderBy) .
-			$this->buildLimitOffset($query->limit, $query->offset);
+		$sql = $this->buildSelect($query->select) . $this->buildFrom($query->from);
+		if ($query->join) {
+			$sql .= $this->buildJoin($query->join);
+		}
+		if ($query->where) {
+			$sql .= $this->buildWhere($query->where);
+		}
+		if ($query->groupBy) {
+			$sql .= $this->buildGroupBy($query->groupBy);
+		}
+		if ($query->having) {
+			$sql .= $this->buildHaving($query->having);
+		}
+		if ($query->orderBy) {
+			$sql .= $this->buildOrderBy($query->orderBy);
+		}
+		if ($query->limit && $query->offset) {
+			$sql .= $this->buildLimitOffset($query->limit, $query->offset);
+		}
+		elseif ($query->limit) {
+			$sql .= $this->buildLimitOffset($query->limit);
+		}
+
+		return $sql;
 	}
 
 	public function buildLimitOffset(int $limit, int $offset = 0): string
@@ -314,7 +330,7 @@ class QueryBuilder
 		}
 
 		$column = $this->db->quote($column);
-		$operator = $isNot ? "NOT LINE" : "LIKE";
+		$operator = $isNot ? "NOT LIKE" : "LIKE";
 		return "{$column} {$operator} {$value}";
 	}
 
