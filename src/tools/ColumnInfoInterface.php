@@ -4,21 +4,16 @@ namespace jugger\db\tools;
 
 interface ColumnInfoInterface
 {
-    /**
-     * Первичный ключ
-     * @var integer
-     */
     const KEY_PRIMARY = 1;
-    /**
-     * Уникальный индекс
-     * @var integer
-     */
     const KEY_UNIQUE = 2;
-    /**
-     * Остальные индексы
-     * @var integer
-     */
     const KEY_INDEX = 3;
+
+    const TYPE_INT = 'int';
+    const TYPE_TEXT = 'text';
+    const TYPE_BLOB = 'blob';
+    const TYPE_FLOAT = 'float';
+    const TYPE_DATETIME = 'datetime';
+
     /**
      * Имя столбца
      * @return string
