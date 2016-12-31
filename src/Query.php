@@ -6,6 +6,8 @@ use Bitrix\Main\Application;
 
 class Query
 {
+	protected $db;
+
 	public $select = "*";
 	public $from;
 	public $join;
@@ -15,6 +17,11 @@ class Query
 	public $orderBy;
 	public $limit;
 	public $offset;
+
+	public function __construct(ConnectionInterface $db = null)
+	{
+		$this->db = $db;
+	}
 
 	public function select($value = "*"): Query
 	{
@@ -111,25 +118,25 @@ class Query
 		return $this;
 	}
 
-	public function build(ConnectionInterface $db): Query
+	public function build(): string
 	{
-		return (new QueryBuilder($db))->build($this);
+		return (new QueryBuilder($this->db))->build($this);
 	}
 
-	public function query(ConnectionInterface $db): Query
+	public function query(): QueryResult
 	{
-        $sql = $this->build($db);
-		return $db->query($sql);
+        $sql = $this->build();
+		return $this->db->query($sql);
 	}
 
-	public function one(ConnectionInterface $db): array
+	public function one()
     {
-		$row = $this->query($db)->fetch();
+		$row = $this->query()->fetch();
 		return $row ?? null;
 	}
 
-	public function all(ConnectionInterface $db): array
+	public function all(): array
     {
-        return $this->query($db)->fetchAll();
+        return $this->query()->fetchAll();
 	}
 }
