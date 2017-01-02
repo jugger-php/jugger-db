@@ -11,7 +11,11 @@ class TableInfoTest extends TestCase
     {
         static $db;
         if (!$db) {
-            $db = new MysqliConnection("localhost", "root", "", "test");
+            $db = new MysqliConnection();
+            $db->host = "localhost";
+            $db->dbname = "test";
+            $db->username = "root";
+            $db->password = "";
         }
         return $db;
     }
@@ -28,8 +32,7 @@ class TableInfoTest extends TestCase
             `datetime` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )
         ";
-        $db = $this->db();
-        $db->execute($sql);
+        $this->db()->execute($sql);
     }
 
     public function tearDown()
