@@ -6,23 +6,35 @@ use jugger\db\ConnectionInterface;
 
 class MysqliConnection implements ConnectionInterface
 {
-    protected $db;
+    public $host;
+    public $dbname;
+    public $username;
+    public $password;
 
-    public function __construct(string $host, string $username, string $password, string $dbname)
+    public function getDriver()
     {
-        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-        $this->db = new \mysqli($host, $username, $password, $dbname);
+        static $driver;
+        if (!$driver) {
+            mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+            $driver = new \mysqli(
+                $this->host,
+                $this->username,
+                $this->password,
+                $this->dbname
+            );
+        }
+        return $driver;
     }
 
     public function query(string $sql): QueryResult
     {
-        $result = $this->db->query($sql);
+        $result = $this->getDriver()->query($sql);
         return new MysqliQueryResult($result);
     }
 
     public function execute(string $sql): int
     {
-        return $this->db->query($sql);
+        return $this->getDriver()->query($sql);
     }
 
     public function escape($value, string $charset = 'utf8'): string
@@ -31,8 +43,8 @@ class MysqliConnection implements ConnectionInterface
             return (string) intval($value);
         }
         else {
-            $this->db->set_charset($charset);
-            return $this->db->real_escape_string($value);
+            $this->getDriver()->set_charset($charset);
+            return $this->getDriver()->real_escape_string($value);
         }
     }
 
@@ -48,21 +60,21 @@ class MysqliConnection implements ConnectionInterface
 
     public function beginTransaction()
     {
-        $this->db->begin_transaction();
+        $this->getDriver()->begin_transaction();
     }
 
     public function commit()
     {
-        $this->db->commit();
+        $this->getDriver()->commit();
     }
 
     public function rollBack()
     {
-        $this->db->rollback();
+        $this->getDriver()->rollback();
     }
 
     public function getLastInsertId($tableName = null): string
     {
-        return $this->db->insert_id;
+        return $this->getDriver()->insert_id;
     }
 }
