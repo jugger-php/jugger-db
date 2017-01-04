@@ -118,6 +118,12 @@ class Query
 		return $this;
 	}
 
+	public function offset($offset): Query
+	{
+		$this->offset = $offset;
+		return $this;
+	}
+
 	public function build(): string
 	{
 		return (new QueryBuilder($this->db))->build($this);
