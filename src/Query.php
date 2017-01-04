@@ -114,7 +114,9 @@ class Query
 	public function limit($limit, $offset = 0): Query
 	{
 		$this->limit = $limit;
-		$this->offset = $offset;
+		if ($offset > 0) {
+			$this->offset = $offset;
+		}
 		return $this;
 	}
 
