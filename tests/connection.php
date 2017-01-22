@@ -85,6 +85,14 @@ class ConnectionTest extends TestCase
             "LIKE '%\' AND id LIKE \'1%'",
             "LIKE '%". $db->escape("' AND id LIKE '1") ."%'"
         );
+        $this->assertEquals(
+            " \'\\\\\\'\\\\\\' \\\"\\\\\\\" ",
+            $db->escape(" '\'\\' \"\\\" ")
+        );
+        $this->assertEquals(
+            " \\\"\\\\\\\"\\\\\\\" \\'\\\\\\' ",
+            $db->escape(' "\"\\" \'\\\' ')
+        );
     }
 
     /**
