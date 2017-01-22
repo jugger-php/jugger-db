@@ -16,8 +16,9 @@ Di::$pool = new ConnectionPool([
         'dsn' => 'sqlite::memory:',
     ],
     'mysql' => [
-        'class' => 'jugger\db\driver\PdoConnection',
-        'dsn' => 'mysql:localhost;dbname=test',
+        'class' => 'jugger\db\driver\MysqliConnection',
+        'host' => 'localhost',
+        'dbname' => 'test',
         'username' => 'root',
         'password' => '',
     ],
