@@ -39,7 +39,7 @@ class InsertUpdateDeleteTest extends TestCase
         $command = (new Command($db))->insert("t1", $values);
         $this->assertEquals(
             $command->getSql(),
-            "INSERT INTO `t1`(`name`,`content`,`update_time`) VALUES('name_val','\' AND \\\\\'1\\\" = 1','1400000000')"
+            "INSERT INTO `t1`(`name`,`content`,`update_time`) VALUES('name_val','\\' AND \\\\\\'1\\\" = 1','1400000000')"
         );
         $this->assertEquals($command->execute(), 1);
         /*
