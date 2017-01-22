@@ -10,7 +10,7 @@ use jugger\db\Command;
 
 $values = [
     'name' => 'name_val',
-    'content' => "' and \'1' = 1",
+    'content' => "' AND \'1' = 1",
     'update_time' => 1400000000,
 ];
 

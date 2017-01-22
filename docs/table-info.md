@@ -47,13 +47,6 @@ $columns['date']->getIsNull();  //  true
 $columns['datetime']->getType();    //  ColumnInfoInterface::TYPE_DATETIME
 $columns['datetime']->getDefault(); //  'CURRENT_TIMESTAMP'
 $columns['datetime']->getIsNull();  //  false
-
-$columns['content']->getType();     //  ColumnInfoInterface::TYPE_TEXT
-$columns['content']->getSize();     //  0
-$columns['content']->getKey();      //  -1
-$columns['content']->getDefault();  //  ""
-$columns['content']->getOther();    //  ""
-$columns['content']->getIsNull();   //  true
 ```
 
 Интерфейс `ColumnInfoInterface` содержит константы типов столбцов и ключей, а также методов для получения информации о столбце:
