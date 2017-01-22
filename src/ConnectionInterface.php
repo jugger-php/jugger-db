@@ -5,15 +5,15 @@ namespace jugger\db;
 interface ConnectionInterface
 {
     /**
-     * Выполняет запрос SELECT и другие, которые возвращают значения
+     * Выполняет запросы, которые возвращают значение (SHOW, SELECT, ...)
      * @param  string      $sql запрос
      * @return QueryResult      объект запроса (даже если ничего не найдено)
      */
     public function query(string $sql): QueryResult;
     /**
-     * Выполняет запросы INSERT, UPDATE, DELETE и другие, которые не возвращают данные
+     * Выполняет запросы, которые не возвращают данные (INSERT, UPDATE, DELETE, ...)
      * @param  string  $sql запрос
-     * @return integer      количество измененых (добавленыъ) строк
+     * @return integer      количество измененых (добавленых) строк
      */
     public function execute(string $sql): int;
     /**
@@ -23,17 +23,27 @@ interface ConnectionInterface
      */
     public function escape($value): string;
     /**
-     * Оборачивает значение в кавычки
+     * Оборачивает значение в кавычки (квоты)
      * @param  string    $value имя столбца, таблицы, базы
-     * @return string           значение обернутое в кавычки
+     * @return string           значение обернутое в кавычки (квоты)
      */
     public function quote(string $value): string;
-
+    /**
+     * Начало транзакции
+     */
     public function beginTransaction();
-
+    /**
+     * Фиксация транзации
+     */
     public function commit();
-
+    /**
+     * Отказ изменений транзакции
+     */
     public function rollBack();
-
-    public function getLastInsertId($tableName = null): string;
+    /**
+     * ID последней добавленной записи
+     * Возвращает строку, т.к. ID может превышать PHP_INT_MAX
+     * @return string ID записи
+     */
+    public function getLastInsertId(): string;
 }

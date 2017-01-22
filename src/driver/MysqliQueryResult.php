@@ -17,8 +17,13 @@ class MysqliQueryResult extends QueryResult
         return $this->result->fetch_assoc();
     }
 
-    public function fetchAll()
+    public function fetchAll(): array
     {
         return $this->result->fetch_all(\MYSQLI_ASSOC);
+    }
+
+    public function count(): int
+    {
+        return $this->result->num_rows;
     }
 }

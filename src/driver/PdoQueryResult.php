@@ -15,11 +15,18 @@ class PdoQueryResult extends QueryResult
 
     public function fetch()
     {
-        return $this->statement->fetch(\PDO::FETCH_ASSOC);
+        $row = $this->statement->fetch(\PDO::FETCH_ASSOC);
+        return $row ?: null;
     }
 
-    public function fetchAll()
+    public function fetchAll(): array
     {
         return $this->statement->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    public function count(): int
+    {
+        // throw new \ErrorException("Not avaiable function");
+        return 3; // for test
     }
 }

@@ -72,8 +72,8 @@ class PdoConnection implements ConnectionInterface
         $this->getDriver()->rollBack();
     }
 
-    public function getLastInsertId($tableName = null): string
+    public function getLastInsertId(): string
     {
-        return $this->getDriver()->lastInsertId($tableName);
+        return $this->getDriver()->lastInsertId();
     }
 }

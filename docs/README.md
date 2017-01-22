@@ -4,7 +4,8 @@
 
 ## Содержание
 
-- [Объект соединения с базой (Connection)](connection.md)
-- [Пул запросов (ConnectionPool)](connection-pool.md)
-- [Построитель запросов (Query, QueryBuilder)](query-builder.md)
-- [Результат запроса (QueryResult)](query-result.md)
+- [Connection: Объект соединения с базой](connection.md)
+- [ConnectionPool: Пул запросов](connection-pool.md)
+- [Query: Построитель запросов SELECT](query-builder.md)
+- [Command: Построитель запросов INSERT, UPDATE, DELETE](command.md)
+- [QueryResult: Результат запроса](query-result.md)

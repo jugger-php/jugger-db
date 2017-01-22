@@ -23,7 +23,7 @@ class Query
 		$this->db = $db;
 	}
 
-	public function select($value = "*"): Query
+	public function select($value): Query
 	{
 		$this->select = $value;
 		return $this;
@@ -89,7 +89,6 @@ class Query
 				$value
 			];
 		}
-
 		return $this;
 	}
 
@@ -140,7 +139,7 @@ class Query
 	public function one()
     {
 		$row = $this->query()->fetch();
-		return $row ?? null;
+		return $row ?: null;
 	}
 
 	public function all(): array

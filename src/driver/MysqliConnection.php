@@ -6,6 +6,8 @@ use jugger\db\ConnectionInterface;
 
 class MysqliConnection implements ConnectionInterface
 {
+    private $driver;
+
     public $host;
     public $dbname;
     public $username;
@@ -13,17 +15,16 @@ class MysqliConnection implements ConnectionInterface
 
     public function getDriver()
     {
-        static $driver;
-        if (!$driver) {
+        if (!$this->driver) {
             mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-            $driver = new \mysqli(
+            $this->driver = new \mysqli(
                 $this->host,
                 $this->username,
                 $this->password,
                 $this->dbname
             );
         }
-        return $driver;
+        return $this->driver;
     }
 
     public function query(string $sql): QueryResult
@@ -34,7 +35,8 @@ class MysqliConnection implements ConnectionInterface
 
     public function execute(string $sql): int
     {
-        return $this->getDriver()->query($sql);
+        $this->getDriver()->query($sql);
+        return $this->getDriver()->affected_rows;
     }
 
     public function escape($value, string $charset = 'utf8'): string
@@ -73,7 +75,7 @@ class MysqliConnection implements ConnectionInterface
         $this->getDriver()->rollback();
     }
 
-    public function getLastInsertId($tableName = null): string
+    public function getLastInsertId(): string
     {
         return $this->getDriver()->insert_id;
     }

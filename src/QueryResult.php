@@ -14,7 +14,7 @@ abstract class QueryResult
      * Возвращает список всех строк
      * @return array
      */
-    public function fetchAll()
+    public function fetchAll(): array
     {
         $rows = [];
         while ($row = $this->fetch()) {
@@ -22,4 +22,9 @@ abstract class QueryResult
         }
         return $rows;
     }
+    /**
+     * Количество строк в результирующем наборе
+     * @return int
+     */
+    abstract public function count(): int;
 }
