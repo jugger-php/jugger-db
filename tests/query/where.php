@@ -128,6 +128,14 @@ class WhereTest extends TestCase
             ],
             [
                 [
+                    '!col1' => [1,2,3],
+                    '!=col2' => [4,5,6],
+                    '!@col3' => (new Query($this->db()))->from('t2'),
+                ],
+                "(`col1` NOT IN ('1', '2', '3') AND `col2` NOT IN ('4', '5', '6') AND `col3` NOT IN (SELECT * FROM t2))"
+            ],
+            [
+                [
                     '><col1' => [1,50],
                     '>!<col2' => [50,100],
                 ],
@@ -149,8 +157,9 @@ class WhereTest extends TestCase
                     '!%col2' => "%str",
                     '!%col3' => "str%",
                     '!%col4' => "%str%",
+                    '!%col5' => (new Query($this->db()))->from('t'),
                 ],
-                "(`col1` NOT LIKE 'str' AND `col2` NOT LIKE '%str' AND `col3` NOT LIKE 'str%' AND `col4` NOT LIKE '%str%')"
+                "(`col1` NOT LIKE 'str' AND `col2` NOT LIKE '%str' AND `col3` NOT LIKE 'str%' AND `col4` NOT LIKE '%str%' AND `col5` NOT LIKE (SELECT * FROM t))"
             ],
             [
                 [
