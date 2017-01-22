@@ -7,28 +7,30 @@ use jugger\db\ConnectionPool;
 
 class InsertUpdateDeleteTest extends TestCase
 {
-    public function db()
+    public function dataProvider()
     {
-        return Di::$pool['default'];
+        $sqlite = Di::$pool['default'];
+        $sqlite->execute("DROP TABLE IF EXISTS `t1`");
+        $sqlite->execute("CREATE TABLE IF NOT EXISTS `t1` ( `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `content` TEXT, `update_time` INT )");
+
+        $mysql = Di::$pool['mysql'];
+        $mysql->execute("DROP TABLE IF EXISTS `t1`");
+        $mysql->execute("CREATE TABLE IF NOT EXISTS `t1` ( `id` INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL, `name` TEXT, `content` TEXT, `update_time` INT )");
+
+        return [
+            // [$sqlite], SQLite not working with escaping
+            [$mysql],
+        ];
     }
 
-    public static function setUpBeforeClass()
+    /**
+     * @dataProvider dataProvider
+     */
+    public function testInsert($db)
     {
-        $sql = "CREATE TABLE `t1` ( `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `content` TEXT, `update_time` INT )";
-        Di::$pool['default']->execute($sql);
-    }
-
-    public static function tearDownAfterClass()
-    {
-        Di::$pool['default']->execute("DROP TABLE `t1`");
-    }
-
-    public function testInsert()
-    {
-        $db = $this->db();
         $values = [
             'name' => 'name_val',
-            'content' => 'content_val',
+            'content' => "' AND \'1\" = 1",
             'update_time' => 1400000000,
         ];
         /*
@@ -37,7 +39,7 @@ class InsertUpdateDeleteTest extends TestCase
         $command = (new Command($db))->insert("t1", $values);
         $this->assertEquals(
             $command->getSql(),
-            "INSERT INTO `t1`(`name`,`content`,`update_time`) VALUES('name_val','content_val','1400000000')"
+            "INSERT INTO `t1`(`name`,`content`,`update_time`) VALUES('name_val','\' AND \\\\\'1\\\" = 1','1400000000')"
         );
         $this->assertEquals($command->execute(), 1);
         /*
@@ -50,11 +52,11 @@ class InsertUpdateDeleteTest extends TestCase
     }
 
     /**
+     * @dataProvider dataProvider
      * @depends testInsert
      */
-    public function testUpdate()
+    public function testUpdate($db)
     {
-        $db = $this->db();
         $values = [
             'name' => 'new name',
             'content' => 'new content',
@@ -86,13 +88,16 @@ class InsertUpdateDeleteTest extends TestCase
     }
 
     /**
+     * @dataProvider dataProvider
      * @depends testUpdate
      */
-    public function testDelete()
+    public function testDelete($db)
     {
-        $db = $this->db();
+        $row = (new Query($db))
+            ->select('id')
+            ->from('t1')
+            ->one();
 
-        $row = (new Query($db))->from('t1')->one();
         $rowId = $row['id'];
         $where = ['id' => $rowId];
         /*
@@ -111,5 +116,14 @@ class InsertUpdateDeleteTest extends TestCase
             ->where($where)
             ->one();
         $this->assertEmpty($row);
+    }
+
+    /**
+     * @dataProvider dataProvider
+     * @depends testDelete
+     */
+    public function testDrop($db)
+    {
+        $db->execute("DROP TABLE IF EXISTS `t1`");
     }
 }
