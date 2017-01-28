@@ -36,7 +36,12 @@ class Command
 		$valuesStr = [];
 		foreach ($values as $column => $value) {
 			$columnsStr[] = $this->db->quote($column);
-			$valuesStr[] = "'". $this->db->escape($value) ."'";
+            if (is_null($value)) {
+                $valuesStr[] = "NULL";
+            }
+            else {
+                $valuesStr[] = "'". $this->db->escape($value) ."'";
+            }
 		}
 
 		$columnsStr = implode(",", $columnsStr);
