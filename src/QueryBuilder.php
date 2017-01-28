@@ -13,7 +13,7 @@ class QueryBuilder
 
 	public function build(Query $query): string
 	{
-		$sql = $this->buildSelect($query->select) . $this->buildFrom($query->from);
+		$sql = $this->buildSelect($query->select, $query->distinct) . $this->buildFrom($query->from);
 		if ($query->join) {
 			$sql .= $this->buildJoin($query->join);
 		}
@@ -104,9 +104,12 @@ class QueryBuilder
 		return " HAVING ".$having;
 	}
 
-	public function buildSelect($select): string
+	public function buildSelect($select, $distinct): string
 	{
 		$sql = "SELECT ";
+		if ($distinct) {
+			$sql .= "DISTINCT ";
+		}
 
 		if (empty($select)) {
 			$sql .= "*";

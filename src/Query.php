@@ -9,6 +9,7 @@ class Query
 	protected $db;
 
 	public $select = "*";
+	public $distinct;
 	public $from;
 	public $join;
 	public $where;
@@ -26,6 +27,12 @@ class Query
 	public function select($value): Query
 	{
 		$this->select = $value;
+		return $this;
+	}
+
+	public function distinct()
+	{
+		$this->distinct = true;
 		return $this;
 	}
 

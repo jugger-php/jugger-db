@@ -10,6 +10,16 @@ class SelectFromTest extends TestCase
         return Di::$pool['default'];
     }
 
+    public function testDistinct()
+    {
+        $q = (new Query($this->db()))->distinct()->from('t');
+
+        $this->assertEquals(
+            $q->build(),
+            'SELECT DISTINCT * FROM t'
+        );
+    }
+
     /**
      * Проверка генерации блока SELECT
      * @dataProvider selectProvider
