@@ -39,6 +39,9 @@ class Command
             if (is_null($value)) {
                 $valuesStr[] = "NULL";
             }
+            elseif ($value instanceof Expression) {
+                $valuesStr[] = $value->getValue();
+            }
             else {
                 $valuesStr[] = "'". $this->db->escape($value) ."'";
             }
@@ -58,8 +61,16 @@ class Command
 		$values = [];
 		foreach ($columns as $name => $value) {
 			$name = $this->db->quote($name);
-			$value = $this->db->escape($value);
-			$values[] = "{$name} = '{$value}'";
+            if (is_null($value)) {
+                $value = "NULL";
+            }
+            elseif ($value instanceof Expression) {
+                $value = $value->getValue();
+            }
+            else {
+                $value = "'{$this->db->escape($value)}'";
+            }
+			$values[] = "{$name} = {$value}";
 		}
 
 		$values = implode(', ', $values);

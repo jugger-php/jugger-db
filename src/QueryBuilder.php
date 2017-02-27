@@ -13,7 +13,8 @@ class QueryBuilder
 
 	public function build(Query $query): string
 	{
-		$sql = $this->buildSelect($query->select, $query->distinct) . $this->buildFrom($query->from);
+		$sql  = "SELECT ". $this->buildSelect($query->select, $query->distinct);
+		$sql .= " FROM ". $this->buildFrom($query->from);
 		if ($query->join) {
 			$sql .= $this->buildJoin($query->join);
 		}
@@ -106,7 +107,7 @@ class QueryBuilder
 
 	public function buildSelect($select, $distinct): string
 	{
-		$sql = "SELECT ";
+		$sql = null;
 		if ($distinct) {
 			$sql .= "DISTINCT ";
 		}
@@ -120,13 +121,16 @@ class QueryBuilder
 		elseif (is_array($select)) {
 			foreach ($select as $alias => $column) {
 				if (is_integer($alias)) {
-					$sql .= $this->db->quote($column);
+					$sql .= $column instanceof Expression ? $column->getValue() : $this->db->quote($column);
 				}
 				elseif ($column instanceof Query) {
 					$sql .= "({$column->build()}) AS ".$this->db->quote($alias);
 				}
+				elseif ($column instanceof Expression) {
+					$sql .= "{$column} AS ".$this->db->quote($alias);
+				}
 				else {
-					$sql .= $this->db->quote($column) ." AS ".$this->db->quote($alias);
+					$sql .= $this->db->quote($column) ." AS ". $this->db->quote($alias);
 				}
 				$sql .= ", ";
 			}
@@ -137,7 +141,7 @@ class QueryBuilder
 
 	public function buildFrom($from): string
 	{
-		$sql = " FROM ";
+		$sql = null;
 
 		if (is_string($from)) {
 			$sql .= $from;
@@ -149,6 +153,9 @@ class QueryBuilder
 				}
 				elseif ($table instanceof Query) {
 					$sql .= "({$table->build()}) AS ".$this->db->quote($alias);
+				}
+				elseif ($table instanceof Expression) {
+					$sql .= "{$table} AS ".$this->db->quote($alias);
 				}
 				else {
 					$sql .= $this->db->quote($table) ." AS ".$this->db->quote($alias);
@@ -262,6 +269,19 @@ class QueryBuilder
 		return [$op, $key];
 	}
 
+	public function buildValue($value)
+	{
+		if ($value instanceof Query) {
+			return "({$value->build()})";
+		}
+		elseif ($value instanceof Expression) {
+			return $value->getValue();
+		}
+		else {
+			return "'{$this->db->escape($value)}'";
+		}
+	}
+
 	public function buildWhereSimple(string $column, string $operator, $value): string
 	{
 		switch ($operator) {
@@ -293,7 +313,7 @@ class QueryBuilder
 			case '<':
 			case '<=':
 				$column = $this->db->quote($column);
-                $value = "'". $this->db->escape($value) ."'";
+                $value = $this->buildValue($value);
 				return $column . $operator . $value;
 			default:
 				 throw new \Exception("Not found operator '{$operator}'");
@@ -310,13 +330,13 @@ class QueryBuilder
 		elseif (is_bool($value)) {
 			$sql = "IS {$not} ".($value ? "TRUE" : "FALSE");
 		}
-		elseif (is_scalar($value)) {
-			$op = $isNot ? "<>" : "=";
-            $value = "'". $this->db->escape($value) ."'";
-			$sql = "{$op} {$value}";
-		}
 		elseif (is_array($value) || $value instanceof Query) {
 			return $this->inOperator($column, $value, $isNot);
+		}
+		else {
+			$op = $isNot ? "<>" : "=";
+			$value = $this->buildValue($value);
+			$sql = "{$op} {$value}";
 		}
 
 		$column = $this->db->quote($column);
@@ -325,13 +345,7 @@ class QueryBuilder
 
 	public function likeOperator(string $column, $value, bool $isNot = false): string
 	{
-		if ($value instanceof Query) {
-			$value = "({$value->build()})";
-		}
-		else {
-			$value = "'". $this->db->escape($value) ."'";
-		}
-
+		$value = $this->buildValue($value);
 		$column = $this->db->quote($column);
 		$operator = $isNot ? "NOT LIKE" : "LIKE";
 		return "{$column} {$operator} {$value}";
@@ -342,9 +356,6 @@ class QueryBuilder
 		if (is_string($value)) {
 			$value = "($value)";
 		}
-		elseif ($value instanceof Query) {
-			$value = "({$value->build()})";
-		}
 		elseif (is_array($value)) {
 			$sql = "";
 			foreach ($value as $item) {
@@ -353,6 +364,12 @@ class QueryBuilder
 			}
 			$sql = substr($sql, 0, -2);
 			$value = "({$sql})";
+		}
+		elseif ($value instanceof Query) {
+			$value = $this->buildValue($value);
+		}
+		else {
+			$value = "({$this->buildValue($value)})";
 		}
 
 		$column = $this->db->quote($column);

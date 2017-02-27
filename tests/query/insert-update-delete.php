@@ -4,6 +4,7 @@ use PHPUnit\Framework\TestCase;
 use jugger\db\Query;
 use jugger\db\Command;
 use jugger\db\ConnectionPool;
+use jugger\db\Expression;
 
 class InsertUpdateDeleteTest extends TestCase
 {
@@ -31,7 +32,7 @@ class InsertUpdateDeleteTest extends TestCase
         $values = [
             'name' => 'name_val',
             'content' => "' AND \'1\" = 1",
-            'update_time' => 1400000000,
+            'update_time' => new Expression(1400000000),
         ];
         /*
          * test SQL
@@ -39,7 +40,7 @@ class InsertUpdateDeleteTest extends TestCase
         $command = (new Command($db))->insert("t1", $values);
         $this->assertEquals(
             $command->getSql(),
-            "INSERT INTO `t1`(`name`,`content`,`update_time`) VALUES('name_val','\\' AND \\\\\\'1\\\" = 1','1400000000')"
+            "INSERT INTO `t1`(`name`,`content`,`update_time`) VALUES('name_val','\\' AND \\\\\\'1\\\" = 1',1400000000)"
         );
         $this->assertEquals($command->execute(), 1);
         /*
@@ -59,7 +60,7 @@ class InsertUpdateDeleteTest extends TestCase
     {
         $values = [
             'name' => 'new name',
-            'content' => 'new content',
+            'content' => new Expression("'new content'"),
         ];
         $where = [
             '!id' => null,
@@ -82,9 +83,9 @@ class InsertUpdateDeleteTest extends TestCase
         $row = (new Query($db))->from('t1')
             ->where($where)
             ->one();
-        foreach ($values as $column => $value) {
-            $this->assertEquals($row[$column], $value);
-        }
+
+        $this->assertEquals($row['name'], $values['name']);
+        $this->assertEquals("'{$row['content']}'", (string) $values['content']);
     }
 
     /**

@@ -2,6 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 use jugger\db\Query;
+use jugger\db\Expression;
 
 class WhereTest extends TestCase
 {
@@ -156,7 +157,7 @@ class WhereTest extends TestCase
                     '!%col1' => "str",
                     '!%col2' => "%str",
                     '!%col3' => "str%",
-                    '!%col4' => "%str%",
+                    '!%col4' => new Expression("'%str%'"),
                     '!%col5' => (new Query($this->db()))->from('t'),
                 ],
                 "(`col1` NOT LIKE 'str' AND `col2` NOT LIKE '%str' AND `col3` NOT LIKE 'str%' AND `col4` NOT LIKE '%str%' AND `col5` NOT LIKE (SELECT * FROM t))"

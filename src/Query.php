@@ -2,8 +2,6 @@
 
 namespace jugger\db;
 
-use Bitrix\Main\Application;
-
 class Query
 {
 	protected $db;
